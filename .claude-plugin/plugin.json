@@ -1,8 +1,0 @@
-{
-  "name": "claude-plugins-qwickapps",
-  "description": "QwickApps plugin marketplace for Claude Code",
-  "author": {
-    "name": "QwickApps",
-    "email": "support@qwickapps.com"
-  }
-}

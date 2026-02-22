@@ -1,0 +1,22 @@
+{
+  "name": "claude-plugins-qwickapps",
+  "description": "QwickApps plugin marketplace for Claude Code",
+  "owner": {
+    "name": "QwickApps",
+    "email": "support@qwickapps.com"
+  },
+  "plugins": [
+    {
+      "name": "qwickapps-ux-design",
+      "description": "QwickApps UX design system enforcement. Replaces frontend-design with framework-aware version. Enforces @qwickapps/react-framework components and --theme-* CSS variables.",
+      "source": "./plugins/qwickapps-ux-design",
+      "category": "development"
+    },
+    {
+      "name": "qwickapps-dev-guide",
+      "description": "QwickApps developer guidance skills. Teaches how to build apps using @qwickapps/cms, @qwickapps/server, and @qwickapps/react-framework.",
+      "source": "./plugins/qwickapps-dev-guide",
+      "category": "development"
+    }
+  ]
+}
