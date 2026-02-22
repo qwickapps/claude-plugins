@@ -43,7 +43,7 @@ Before writing any JSX:
 - Import ONLY from `@qwickapps/react-framework`
 - Import pattern: `import { Section, GridLayout, Button, HeroBlock } from '@qwickapps/react-framework'`
 - Every app must be wrapped in `<QwickApp appId="com.qwickapps.appname" appName="AppName">`
-- Never import from `@mui/material` — if something seems missing, run `find-component` first
+- Never import from `@mui/material` or `@mui/icons-material` — if something seems missing, run `find-component` first
 
 ### Colors — CSS Variables Only
 - All colors via CSS variables: `sx={{ color: 'var(--theme-primary)' }}`

@@ -53,8 +53,8 @@ done
 
 ERRORS=()
 
-# Rule 1: No MUI material imports
-if echo "$CONTENT" | grep -qE "from ['\"]@mui/material['\"]"; then
+# Rule 1: No MUI material imports (bare or sub-path: '@mui/material/Button' etc.)
+if echo "$CONTENT" | grep -qE "from ['\"]@mui/material"; then
   ERRORS+=("❌ MUI import detected: @mui/material
    → Run the find-component skill to find the @qwickapps/react-framework equivalent
    → If no match exists, run extend-framework to add it")
