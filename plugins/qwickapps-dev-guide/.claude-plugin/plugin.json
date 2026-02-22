@@ -1,0 +1,22 @@
+{
+  "name": "qwickapps-dev-guide",
+  "description": "QwickApps developer guidance skills. Teaches how to build apps using @qwickapps/cms (ServerQwickApp, BlockRenderer, FooterFromSettings), @qwickapps/server (createGateway, port scheme, control panel plugins), and @qwickapps/react-framework (QwickApp, navigation, theme variables). Use alongside qwickapps-ux-design for complete QwickApps development guidance.",
+  "author": {
+    "name": "QwickApps",
+    "email": "support@qwickapps.com"
+  },
+  "skills": [
+    {
+      "name": "build-with-cms",
+      "path": "skills/build-with-cms/SKILL.md"
+    },
+    {
+      "name": "build-with-server",
+      "path": "skills/build-with-server/SKILL.md"
+    },
+    {
+      "name": "build-frontend-app",
+      "path": "skills/build-frontend-app/SKILL.md"
+    }
+  ]
+}
