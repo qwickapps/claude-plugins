@@ -32,7 +32,7 @@ The design requires something the framework doesn't have. Extend the framework f
 ### Step 1: Create a worktree
 
 ```bash
-cd /Users/raajkumars/Projects/qwickapps
+cd <qwickapps-monorepo-root>  # Navigate to your local qwickapps monorepo
 .claude/scripts/create-worktree.sh framework-add-<name>
 cd ../qwickapps-wt-framework-add-<name>
 ```
