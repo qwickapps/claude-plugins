@@ -278,13 +278,18 @@ gateway.start().then(() => {
 ```json
 {
   "scripts": {
-    "dev:local": "concurrently \"next dev -p $((PORT+2))\" \"tsx watch gateway.ts\"",
+    "dev": "pnpm run build:turbo && qwickapps-migrate && concurrently \"next dev -p $((PORT+2))\" \"tsx watch gateway.ts\"",
+    "dev:local": "qwickapps-migrate && concurrently \"next dev -p $((PORT+2))\" \"tsx watch gateway.ts\"",
     "dev:local:nobuild": "concurrently \"next dev -p $((PORT+2)) --no-turbo\" \"tsx watch gateway.ts\"",
     "start": "concurrently \"next start -p $((PORT+2))\" \"node dist/gateway.js\"",
-    "build": "next build && tsc -p tsconfig.gateway.json"
+    "build": "next build && tsc -p tsconfig.gateway.json",
+    "migrate:promote": "qwickapps-migrate --promote"
   }
 }
 ```
+
+`qwickapps-migrate` runs before dev server start to sync and apply database migrations.
+See `build-with-cms` skill section 6 for full migration workflow details.
 
 ---
 
