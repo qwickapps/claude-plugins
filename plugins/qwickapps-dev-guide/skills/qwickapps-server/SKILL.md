@@ -1,16 +1,17 @@
 ---
-name: build-with-server
+name: qwickapps-server
 description: >
-  Use when building or modifying the gateway layer for any QwickApps product using @qwickapps/server.
-  Covers: createGateway (config interface, port scheme), MountedAppConfig (proxy + static sources),
-  controlPanel configuration, available built-in plugins, WebSocket proxying, and guard patterns.
+  This skill should be used when building or modifying the gateway layer for any QwickApps product
+  using @qwickapps/server. Covers: createGateway configuration, MountedAppConfig (proxy and static
+  sources), controlPanel setup, available built-in plugins, WebSocket proxying, and guard patterns.
   Invoke before writing any gateway.ts or server entry point.
 ---
 
+> **Setup:** For initial project setup (env, port scheme, package.json scripts), start with the `use-stack` skill.
+
 # Building with @qwickapps/server
 
-This skill guides gateway and server development using `@qwickapps/server`. All APIs are verified
-from production clients (authkeaper, work-macha). Read the section that applies to your task.
+This skill guides gateway and server development using `@qwickapps/server`. All APIs are verified from production clients (authkeaper, work-macha).
 
 ---
 
@@ -31,16 +32,7 @@ PORT + 2+   → App services (Payload, Next.js, etc.)
 3402 → Payload/Next.js application
 ```
 
-**Required env vars in `.env.local`:**
-
-```env
-PORT=3400
-PAYLOAD_SERVICE_URL=http://localhost:3402
-DATABASE_URI=postgresql://user:pass@localhost:5432/mydb
-PAYLOAD_SECRET=your-secret-key
-```
-
-Next.js must use `PORT + 2` to avoid conflict with gateway's internal control panel server (PORT + 1).
+For the complete `.env.local` template and port scheme details, see `use-stack` skill and `references/qwickapps-full-stack.md`.
 
 ---
 
@@ -271,29 +263,11 @@ gateway.start().then(() => {
 });
 ```
 
----
-
-## 7. package.json Scripts Pattern
-
-```json
-{
-  "scripts": {
-    "dev": "pnpm run build:turbo && qwickapps-migrate && concurrently \"next dev -p $((PORT+2))\" \"tsx watch gateway.ts\"",
-    "dev:local": "qwickapps-migrate && concurrently \"next dev -p $((PORT+2))\" \"tsx watch gateway.ts\"",
-    "dev:local:nobuild": "concurrently \"next dev -p $((PORT+2)) --no-turbo\" \"tsx watch gateway.ts\"",
-    "start": "concurrently \"next start -p $((PORT+2))\" \"node dist/gateway.js\"",
-    "build": "next build && tsc -p tsconfig.gateway.json",
-    "migrate:promote": "qwickapps-migrate --promote"
-  }
-}
-```
-
-`qwickapps-migrate` runs before dev server start to sync and apply database migrations.
-See `build-with-cms` skill section 6 for full migration workflow details.
+For migration workflow details, see `qwickapps-cms` skill.
 
 ---
 
-## 8. WebSocket Proxy for Next.js HMR
+## 7. WebSocket Proxy for Next.js HMR
 
 When developing with Next.js, HMR requires WebSocket proxy support. Set `ws: true` on the app
 that proxies to Next.js. This is handled automatically in `createGateway`.
@@ -308,7 +282,7 @@ source: {
 
 ---
 
-## 9. Route Guards
+## 8. Route Guards
 
 Guards protect specific mounted paths. Apply at `controlPanel.guard` or `apps[].guard`.
 
@@ -324,7 +298,7 @@ guard: {
 
 ---
 
-## 10. Common Mistakes
+## 9. Common Mistakes
 
 - **Do not** use PORT directly for Payload/Next.js — it conflicts with the gateway. Always use `PORT + 2`.
 - **Do not** expose the control panel port (PORT + 1) externally — it is an internal server.
