@@ -89,7 +89,7 @@ Complete scripts section for a full-stack product:
 | `dev:fast` | Skip turbo build (use when shared packages are already built) |
 | `dev:fresh` | Reset database, run migrations, start fresh |
 | `dev:local` | Same as dev:fast (alias for clarity) |
-| `dev:local:nobuild` | Skip both turbo build and turbopack (fastest restart, no migrations) |
+| `dev:local:nobuild` | Skip monorepo build, migrations, and turbopack (fastest restart for local iteration) |
 | `start` | Production start: Next.js + gateway from compiled output |
 | `build` | Production build: Next.js + gateway TypeScript compilation |
 | `migrate:promote` | Copy dev migration from .dev-migrations/ to src/migrations/ |

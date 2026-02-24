@@ -332,6 +332,9 @@ function MyComponent() {
 
 ## 9. Next.js Integration Pattern
 
+For project setup (env, package.json scripts, payload.config.ts), see `use-stack` skill and
+`references/qwickapps-full-stack.md`.
+
 In a Next.js app with App Router, the `QwickApp` wrapper goes in the client layout:
 
 ```tsx
