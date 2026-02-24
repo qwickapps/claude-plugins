@@ -43,7 +43,7 @@ If reviewing a PR, read the PR description for stated intent. Use the stated int
 
 Use Grep to find existing patterns in the codebase for any area where the changed code introduces a new approach. Deviating from an established pattern is a finding only if the deviation is unjustified. If the new code sets a better pattern, note it as a positive.
 
-Load `qwickapps-sdlc:requesting-review` to adopt the code-reviewer agent persona for the assessment.
+Adopt the code-reviewer agent persona for the assessment.
 
 Apply RESEARCH-DEPTH.md. Do not assert that code has a problem without evidence (file:line). Do not assert compatibility or security concerns without tracing the actual code path.
 

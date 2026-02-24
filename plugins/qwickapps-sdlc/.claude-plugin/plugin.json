@@ -1,7 +1,7 @@
 {
   "name": "qwickapps-sdlc",
   "version": "1.0.0",
-  "description": "Complete software development lifecycle management. Issue-driven workflows, quality gates, agent personas, and engineering discipline skills. Replaces superpowers + ai-sdlc-workflows.",
+  "description": "Complete software development lifecycle management. Issue-driven workflows, quality gates, agent personas, and engineering discipline skills. Replaces the superpowers plugin and the ai-sdlc-workflows Claude commands.",
   "author": {
     "name": "QwickApps",
     "email": "support@qwickapps.com"

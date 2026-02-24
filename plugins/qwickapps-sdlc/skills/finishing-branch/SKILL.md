@@ -239,7 +239,7 @@ Then proceed to Step 5 (worktree cleanup).
 
 ## Step 5: Clean Up the Worktree
 
-Applies to Options 1, 2, and 4 only. Do not clean up for Option 3.
+Applies to Options 1 and 4 only. Do not clean up for Options 2 or 3.
 
 ### Check if work was done in a worktree
 

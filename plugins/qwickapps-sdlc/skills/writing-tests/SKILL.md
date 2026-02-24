@@ -44,7 +44,7 @@ Apply this skill for:
 - Behavior changes
 - Refactoring with behavioral impact
 
-**Exceptions — ask your partner before skipping:**
+**Exceptions — consult the team before skipping:**
 
 - Throwaway prototypes that will be discarded
 - Generated or scaffolded code (migrations, boilerplate)
@@ -336,7 +336,7 @@ These situations indicate TDD was skipped. Stop. Delete the code. Start from a f
 
 | Problem | Solution |
 |---------|----------|
-| Do not know how to write a test | Write the API call you wish existed. Write the assertion first. Ask your partner. |
+| Do not know how to write a test | Write the API call you wish existed. Write the assertion first. Consult the pair programming partner. |
 | The test is too complicated to write | The design is too complicated. Simplify the interface before implementing. |
 | Everything must be mocked | The code is too tightly coupled. Introduce dependency injection. |
 | Test setup requires enormous scaffolding | Extract the scaffolding into helpers. If still complex, simplify the design. |

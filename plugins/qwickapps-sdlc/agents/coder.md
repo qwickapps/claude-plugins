@@ -1,4 +1,5 @@
 ---
+name: coder
 description: Senior software engineer specialized in implementation. Use when /feature, /bug, or /chore needs high-quality, production-ready code. Follows TDD, writes clean code, and maintains consistency with existing codebase.
 capabilities:
   - Clean code implementation following existing patterns

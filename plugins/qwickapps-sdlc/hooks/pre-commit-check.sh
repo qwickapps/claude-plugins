@@ -7,10 +7,12 @@
 
 set -euo pipefail
 
-TOOL_INPUT="${1:-}"
+# Read tool input from stdin (JSON with a "command" field for Bash calls)
+TOOL_INPUT=$(cat)
+COMMAND=$(echo "$TOOL_INPUT" | python3 -c "import sys,json; print(json.load(sys.stdin).get('command',''))" 2>/dev/null || echo "")
 
 # Check if this is a git commit command
-if echo "$TOOL_INPUT" | grep -qE 'git\s+commit'; then
+if echo "$COMMAND" | grep -qE 'git\s+commit'; then
   cat <<EOF
 {
   "hookSpecificOutput": {
