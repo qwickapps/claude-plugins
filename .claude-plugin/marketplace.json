@@ -17,6 +17,12 @@
       "description": "QwickApps developer guidance skills. Start with use-stack to configure tech stack, then reference qwickapps-cms, qwickapps-server, and qwickapps-react-framework for per-package patterns.",
       "source": "./plugins/qwickapps-dev-guide",
       "category": "development"
+    },
+    {
+      "name": "qwickapps-sdlc",
+      "description": "Complete software development lifecycle management. Issue-driven workflows, quality gates, agent personas, and engineering discipline skills. Replaces the superpowers plugin and the ai-sdlc-workflows Claude commands.",
+      "source": "./plugins/qwickapps-sdlc",
+      "category": "development"
     }
   ]
 }

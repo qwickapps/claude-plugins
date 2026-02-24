@@ -1,39 +1,16 @@
 {
   "name": "qwickapps-ux-design",
+  "version": "1.0.0",
   "description": "QwickApps UX design system enforcement. Replaces frontend-design with framework-aware version. Enforces @qwickapps/react-framework components and --theme-* CSS variables. Creative freedom is preserved — missing components trigger framework extension, not workarounds.",
   "author": {
     "name": "QwickApps",
     "email": "support@qwickapps.com"
   },
-  "skills": [
-    {
-      "name": "frontend-design",
-      "path": "skills/frontend-design/SKILL.md"
-    },
-    {
-      "name": "find-component",
-      "path": "skills/find-component/SKILL.md"
-    },
-    {
-      "name": "extend-framework",
-      "path": "skills/extend-framework/SKILL.md"
-    }
-  ],
-  "hooks": [
-    {
-      "event": "PreToolUse",
-      "tool": "Edit",
-      "path": "hooks/enforce-framework-usage.sh"
-    },
-    {
-      "event": "PreToolUse",
-      "tool": "Write",
-      "path": "hooks/enforce-framework-usage.sh"
-    },
-    {
-      "event": "PreToolUse",
-      "tool": "MultiEdit",
-      "path": "hooks/enforce-framework-usage.sh"
-    }
+  "keywords": [
+    "qwickapps",
+    "ux-design",
+    "react-framework",
+    "theme-variables",
+    "component-enforcement"
   ]
 }
