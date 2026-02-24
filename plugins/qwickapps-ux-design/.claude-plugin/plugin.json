@@ -12,6 +12,5 @@
     "react-framework",
     "theme-variables",
     "component-enforcement"
-  ],
-  "hooks": "./hooks/hooks.json"
+  ]
 }
