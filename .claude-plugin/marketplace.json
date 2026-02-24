@@ -14,7 +14,7 @@
     },
     {
       "name": "qwickapps-dev-guide",
-      "description": "QwickApps developer guidance skills. Teaches how to build apps using @qwickapps/cms, @qwickapps/server, and @qwickapps/react-framework.",
+      "description": "QwickApps developer guidance skills. Start with use-stack to configure tech stack, then reference qwickapps-cms, qwickapps-server, and qwickapps-react-framework for per-package patterns.",
       "source": "./plugins/qwickapps-dev-guide",
       "category": "development"
     },

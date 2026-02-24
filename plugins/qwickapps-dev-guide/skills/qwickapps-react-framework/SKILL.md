@@ -1,16 +1,18 @@
 ---
-name: build-frontend-app
+name: qwickapps-react-framework
 description: >
-  Use when setting up the frontend application shell for any QwickApps product using @qwickapps/react-framework.
-  Covers: QwickApp wrapper (required for every app), navigation items (MenuItem format),
-  enableScaffolding (app bar + sidebar), theme CSS variables (--theme-*), and framework component imports.
-  Invoke before creating any layout component or app shell. Use alongside build-with-cms and qwickapps-ux-design.
+  This skill should be used when setting up the frontend application shell for any QwickApps product
+  using `@qwickapps/react-framework`. Covers: QwickApp wrapper (required for every app), navigation
+  items (MenuItem format), enableScaffolding (app bar + sidebar), theme CSS variables (--theme-*),
+  and framework component imports. Invoke before creating any layout component or app shell.
+  Use alongside qwickapps-cms, qwickapps-server, and qwickapps-ux-design.
 ---
+
+> **Setup:** For initial project setup (env, config, package.json scripts), start with the `use-stack` skill.
 
 # Building the Frontend App Shell with @qwickapps/react-framework
 
-This skill covers setting up the `QwickApp` wrapper and app shell. For UI components, also invoke
-`qwickapps-ux-design:frontend-design`. For CMS integration, also invoke `build-with-cms`.
+This skill covers the `QwickApp` wrapper and app shell setup using `@qwickapps/react-framework`.
 
 ---
 
@@ -121,7 +123,7 @@ const nav: MenuItem[] = [
 ## 3. Marketing Site App Shell Pattern
 
 For marketing/public pages (no auth required, no persistent nav scaffolding).
-Navigation is driven by CMS via `ServerQwickApp` — see `build-with-cms`.
+Navigation is driven by CMS via `ServerQwickApp` — see `qwickapps-cms`.
 
 ```tsx
 // src/components/MarketingClientApp.tsx
@@ -329,6 +331,9 @@ function MyComponent() {
 ---
 
 ## 9. Next.js Integration Pattern
+
+For project setup (env, package.json scripts, payload.config.ts), see `use-stack` skill and
+`references/qwickapps-full-stack.md`.
 
 In a Next.js app with App Router, the `QwickApp` wrapper goes in the client layout:
 
