@@ -5,7 +5,7 @@ description: >
   using `@qwickapps/react-framework`. Covers: QwickApp wrapper (required for every app), navigation
   items (MenuItem format), enableScaffolding (app bar + sidebar), theme CSS variables (--theme-*),
   and framework component imports. Invoke before creating any layout component or app shell.
-  Use alongside qwickapps-cms and qwickapps-ux-design.
+  Use alongside qwickapps-cms, qwickapps-server, and qwickapps-ux-design.
 ---
 
 > **Setup:** For initial project setup (env, config, package.json scripts), start with the `use-stack` skill.

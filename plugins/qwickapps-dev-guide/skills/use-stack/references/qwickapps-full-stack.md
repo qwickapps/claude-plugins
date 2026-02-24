@@ -63,7 +63,9 @@ NEXT_PUBLIC_APP_URL=http://localhost:3400
 
 ## package.json Scripts
 
-Complete scripts section for a full-stack product:
+Complete scripts section for a full-stack product. Note: `build:turbo` is a monorepo root-level
+script (runs turbo to build shared packages like `@qwickapps/cms`). It is not defined in the
+client's own package.json.
 
 ```json
 {
@@ -85,8 +87,8 @@ Complete scripts section for a full-stack product:
 
 | Script | Purpose |
 |--------|---------|
-| `dev` | Full dev startup: build shared packages, run migrations, start Next.js + gateway |
-| `dev:fast` | Skip turbo build (use when shared packages are already built) |
+| `dev` | Full dev startup: build shared monorepo packages via turbo (root-level script), run migrations, start Next.js + gateway |
+| `dev:fast` | Skip monorepo turbo build (use when shared packages are already built) |
 | `dev:fresh` | Reset database, run migrations, start fresh |
 | `dev:local` | Same as dev:fast (alias for clarity) |
 | `dev:local:nobuild` | Skip monorepo build, migrations, and turbopack (fastest restart for local iteration) |
