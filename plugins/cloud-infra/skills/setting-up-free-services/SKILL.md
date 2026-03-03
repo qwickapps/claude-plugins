@@ -11,6 +11,14 @@ Guide the user through creating free SaaS accounts and collecting API credential
 NEVER create accounts on behalf of the user. All account creation is manual. This skill provides guidance and collects API keys after the user creates accounts.
 </HARD-GATE>
 
+Before saving any credentials, ensure the env file has restrictive permissions:
+
+```bash
+touch ~/qwickapps-env.sh && chmod 600 ~/qwickapps-env.sh
+```
+
+Run this once at the start. All `cat >>` blocks below append to this file.
+
 ## Which Services to Set Up
 
 Reference `${CLAUDE_PLUGIN_ROOT}/references/service-catalog.md` for full details on each service.
@@ -78,10 +86,7 @@ Ask the user to provide:
 
 ### Save to Environment File
 
-Ensure the env file has restrictive permissions (credentials in plaintext):
-
 ```bash
-touch ~/qwickapps-env.sh && chmod 600 ~/qwickapps-env.sh
 cat >> ~/qwickapps-env.sh << 'EOF'
 
 # Cloudflare R2
