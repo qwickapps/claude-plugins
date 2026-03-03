@@ -25,7 +25,7 @@ Guided provisioning of Oracle Cloud free-tier infrastructure. Supports two modes
 ### If no argument (or argument is a description):
 
 1. Run the interactive questionnaire from the planning-infrastructure skill
-2. Collect answers for all 6 questions
+2. Collect answers for all 7 questions
 
 ## Phase 2: Generate VM Allocation
 
@@ -136,6 +136,8 @@ Only create records for VMs that exist in the allocation.
 **Load skill:** `cloud-infra:setting-up-free-services`
 
 Ask the user if they want to set up additional free services:
+- Cloudflare R2 (object storage, recommended)
+- Backblaze B2 (backups, large files)
 - Neon (managed Postgres, recommended)
 - Supabase (managed Postgres with auth/storage)
 - Upstash (Redis)
@@ -196,6 +198,8 @@ DNS:
   claw.$MY_DOMAIN       -> <IP>
 
 Free Services:
+  R2:       [configured/skipped]
+  B2:       [configured/skipped]
   Neon:     [configured/skipped]
   Supabase: [configured/skipped]
   Upstash:  [configured/skipped]
