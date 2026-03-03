@@ -84,7 +84,7 @@ Expected: HTTP 200 or 302.
 ### Step 5: Idle Protection Cron
 
 ```bash
-ssh <vm-name> 'echo "0 */6 * * * dd if=/dev/urandom bs=1M count=100 | md5sum > /dev/null 2>&1" | crontab -'
+ssh <vm-name> '(crontab -l 2>/dev/null; echo "0 */6 * * * dd if=/dev/urandom bs=1M count=100 | md5sum > /dev/null 2>&1") | crontab -'
 ```
 
 ### Verification
@@ -143,15 +143,24 @@ For 12 GB RAM (db-standard with 2 OCPU), use:
 
 ### Step 4: Create Users and Databases
 
-Generate a strong random password and create the application user:
+Generate a strong random password and create the application user. The password is passed via stdin to avoid exposure in process lists or shell history:
 
 ```bash
 APP_PASSWORD=$(openssl rand -base64 24 | tr -d '/+=' | head -c 32)
 echo "Generated password: $APP_PASSWORD"
+echo "(Save this password now -- it will not be shown again)"
 
-ssh <vm-name> "sudo -u postgres psql -c \"CREATE USER appuser WITH PASSWORD '$APP_PASSWORD' SUPERUSER;\""
+# Create user with least privileges (password passed via stdin, not CLI args)
+ssh <vm-name> "sudo -u postgres psql" << SQL
+CREATE USER appuser WITH PASSWORD '$APP_PASSWORD';
+SQL
+
 ssh <vm-name> "sudo -u postgres psql -c \"CREATE DATABASE appdb OWNER appuser;\""
 ssh <vm-name> "sudo -u postgres psql -c \"CREATE DATABASE clawdb OWNER appuser;\""
+ssh <vm-name> "sudo -u postgres psql -c \"GRANT ALL PRIVILEGES ON DATABASE appdb TO appuser;\""
+ssh <vm-name> "sudo -u postgres psql -c \"GRANT ALL PRIVILEGES ON DATABASE clawdb TO appuser;\""
+
+# Extensions are created as postgres superuser (appuser does not need superuser)
 ssh <vm-name> "sudo -u postgres psql -d appdb -c 'CREATE EXTENSION IF NOT EXISTS vector;'"
 ssh <vm-name> "sudo -u postgres psql -d clawdb -c 'CREATE EXTENSION IF NOT EXISTS vector;'"
 ```
@@ -167,7 +176,7 @@ ssh <vm-name> "sudo systemctl enable postgresql && sudo systemctl restart postgr
 ### Step 6: Idle Protection Cron
 
 ```bash
-ssh <vm-name> 'echo "0 */6 * * * dd if=/dev/urandom bs=1M count=100 | md5sum > /dev/null 2>&1" | crontab -'
+ssh <vm-name> '(crontab -l 2>/dev/null; echo "0 */6 * * * dd if=/dev/urandom bs=1M count=100 | md5sum > /dev/null 2>&1") | crontab -'
 ```
 
 ### Verification
@@ -218,7 +227,9 @@ Same Docker installation as the app server (Step 2 from CapRover section above).
 
 ```bash
 ssh <vm-name> 'bash -s' << 'CLAW_SETUP'
+# Verify the repo URL is correct before cloning. Update if the project has moved.
 sudo git clone https://github.com/openclaw/openclaw.git /opt/openclaw
+test -d /opt/openclaw && echo "Clone: OK" || { echo "Clone: FAILED -- verify the repo URL"; exit 1; }
 cd /opt/openclaw
 sudo bash docker-setup.sh
 CLAW_SETUP
@@ -238,7 +249,7 @@ ssh <vm-name> "cd /opt/openclaw && sudo docker compose up -d"
 ### Step 5: Idle Protection Cron
 
 ```bash
-ssh <vm-name> 'echo "0 */6 * * * dd if=/dev/urandom bs=1M count=100 | md5sum > /dev/null 2>&1" | crontab -'
+ssh <vm-name> '(crontab -l 2>/dev/null; echo "0 */6 * * * dd if=/dev/urandom bs=1M count=100 | md5sum > /dev/null 2>&1") | crontab -'
 ```
 
 ### Verification
@@ -257,7 +268,9 @@ If the allocation has OpenClaw co-located with CapRover (no dedicated AI VM):
 
 ```bash
 ssh <apps-vm-name> 'bash -s' << 'CLAW_COLOC'
+# Verify the repo URL is correct before cloning. Update if the project has moved.
 sudo git clone https://github.com/openclaw/openclaw.git /opt/openclaw
+test -d /opt/openclaw && echo "Clone: OK" || { echo "Clone: FAILED -- verify the repo URL"; exit 1; }
 cd /opt/openclaw
 sudo bash docker-setup.sh
 sudo docker compose up -d

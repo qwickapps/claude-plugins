@@ -103,15 +103,32 @@ Common ingress rules (combine based on VM templates in the allocation):
 - UDP 7946, 4789, 2377 from 0.0.0.0/0 (Docker Swarm -- apps only)
 - TCP 5432 from 10.0.0.0/16 (PostgreSQL -- db only, VCN internal)
 
+Full Stack split example (all ports for apps + db + ai-assistant):
+
 ```bash
 oci network security-list create \
   --compartment-id "$OCI_COMPARTMENT_OCID" \
   --vcn-id "$VCN_OCID" \
   --display-name "free-tier-sl" \
-  --ingress-security-rules '<JSON array of rules>' \
+  --ingress-security-rules '[
+    {"source":"0.0.0.0/0","protocol":"6","tcpOptions":{"destinationPortRange":{"min":22,"max":22}}},
+    {"source":"0.0.0.0/0","protocol":"6","tcpOptions":{"destinationPortRange":{"min":80,"max":80}}},
+    {"source":"0.0.0.0/0","protocol":"6","tcpOptions":{"destinationPortRange":{"min":443,"max":443}}},
+    {"source":"0.0.0.0/0","protocol":"6","tcpOptions":{"destinationPortRange":{"min":3000,"max":3000}}},
+    {"source":"0.0.0.0/0","protocol":"6","tcpOptions":{"destinationPortRange":{"min":996,"max":996}}},
+    {"source":"0.0.0.0/0","protocol":"6","tcpOptions":{"destinationPortRange":{"min":7946,"max":7946}}},
+    {"source":"0.0.0.0/0","protocol":"6","tcpOptions":{"destinationPortRange":{"min":4789,"max":4789}}},
+    {"source":"0.0.0.0/0","protocol":"6","tcpOptions":{"destinationPortRange":{"min":2377,"max":2377}}},
+    {"source":"0.0.0.0/0","protocol":"17","udpOptions":{"destinationPortRange":{"min":7946,"max":7946}}},
+    {"source":"0.0.0.0/0","protocol":"17","udpOptions":{"destinationPortRange":{"min":4789,"max":4789}}},
+    {"source":"0.0.0.0/0","protocol":"17","udpOptions":{"destinationPortRange":{"min":2377,"max":2377}}},
+    {"source":"10.0.0.0/16","protocol":"6","tcpOptions":{"destinationPortRange":{"min":5432,"max":5432}}}
+  ]' \
   --egress-security-rules '[{"destination":"0.0.0.0/0","protocol":"all"}]' \
   --wait-for-state AVAILABLE
 ```
+
+For other splits, remove rules for services not in the allocation (e.g., drop port 5432 if no db VM, drop ports 3000/996/7946/4789/2377 if no CapRover).
 
 **1e. Create Public Subnet:**
 ```bash
@@ -211,7 +228,7 @@ Host <vm-name>
     HostName <public-ip>
     User ubuntu
     IdentityFile ~/.ssh/id_oci
-    StrictHostKeyChecking no
+    StrictHostKeyChecking accept-new
 ```
 
 **2g. Verify SSH Access:**

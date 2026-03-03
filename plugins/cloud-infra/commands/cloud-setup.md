@@ -49,6 +49,18 @@ If the user wants changes, adjust the allocation and re-present. Do not proceed 
 
 Run all checks before starting provisioning. Report results clearly.
 
+### Check 0: Source Environment File
+```bash
+if [ -f ~/my-cloud-env.sh ]; then
+  source ~/my-cloud-env.sh
+  echo "Environment loaded: domain=$MY_DOMAIN, region=$OCI_REGION"
+else
+  echo "Environment file ~/my-cloud-env.sh not found."
+  echo "Create it from the template in the service-catalog reference."
+fi
+```
+If missing: Show the user the template from `${CLAUDE_PLUGIN_ROOT}/references/service-catalog.md` and ask them to fill in their values before proceeding. Get user confirmation before writing the file.
+
 ### Check 1: OCI CLI
 ```bash
 test -f ~/.oci/config && oci iam region list --output table 2>/dev/null | head -5
@@ -187,7 +199,7 @@ Next Steps:
   1. Change CapRover password at http://apps.$MY_DOMAIN:3000
   2. Deploy your first app: caprover deploy (or use the dashboard)
   3. Store the PostgreSQL password securely
-  4. Test your Telegram bot by sending it a message
+  4. (If OpenClaw was set up) Test your Telegram bot by sending it a message
 ```
 
 ## Error Handling

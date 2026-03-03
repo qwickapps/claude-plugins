@@ -67,6 +67,10 @@ echo "$ADS" | while read -r ad; do
 done
 
 echo ""
+echo "NOTE: Shape listed = region supports ARM, but does NOT guarantee"
+echo "      launch will succeed. 'Out of host capacity' errors only"
+echo "      appear on actual instance launch. Retry logic handles this."
+echo ""
 echo "============================================"
 echo "YOUR OCI DETAILS (save these for the AI agent):"
 echo "============================================"

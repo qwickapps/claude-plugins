@@ -34,9 +34,9 @@ Maximizes app hosting resources. Minimal AI.
 
 | VM Name | Template | OCPUs | RAM | Software |
 |---------|----------|-------|-----|----------|
-| oci-apps | apps-large | 2 | 16 GB | CapRover |
+| oci-apps | apps-large | 2 | 12 GB | CapRover |
 | oci-db | db-standard | 1 | 6 GB | PostgreSQL 16 + pgvector |
-| oci-util | minimal | 1 | 2 GB | Docker only |
+| oci-util | minimal | 1 | 6 GB | Docker only |
 
 **Boot storage:** 147 GB. 53 GB remaining.
 
