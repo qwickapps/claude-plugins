@@ -114,8 +114,9 @@ Common ingress rules (combine based on VM templates in the allocation):
 - TCP 22 from 0.0.0.0/0 (SSH -- all VMs)
 - TCP 80, 443 from 0.0.0.0/0 (HTTP/HTTPS -- apps, ai-assistant)
 - TCP 3000 from 0.0.0.0/0 (CapRover -- apps only)
-- TCP 996, 7946, 4789, 2377 from 0.0.0.0/0 (Docker Swarm -- apps only)
-- UDP 7946, 4789, 2377 from 0.0.0.0/0 (Docker Swarm -- apps only)
+- TCP 996 from 0.0.0.0/0 (CapRover -- apps only)
+- TCP 7946, 4789, 2377 from 10.0.0.0/16 (Docker Swarm -- VCN internal only)
+- UDP 7946, 4789, 2377 from 10.0.0.0/16 (Docker Swarm -- VCN internal only)
 - TCP 5432 from 10.0.0.0/16 (PostgreSQL -- db only, VCN internal)
 
 Full Stack split example (all ports for apps + db + ai-assistant):
@@ -131,12 +132,12 @@ oci network security-list create \
     {"source":"0.0.0.0/0","protocol":"6","tcpOptions":{"destinationPortRange":{"min":443,"max":443}}},
     {"source":"0.0.0.0/0","protocol":"6","tcpOptions":{"destinationPortRange":{"min":3000,"max":3000}}},
     {"source":"0.0.0.0/0","protocol":"6","tcpOptions":{"destinationPortRange":{"min":996,"max":996}}},
-    {"source":"0.0.0.0/0","protocol":"6","tcpOptions":{"destinationPortRange":{"min":7946,"max":7946}}},
-    {"source":"0.0.0.0/0","protocol":"6","tcpOptions":{"destinationPortRange":{"min":4789,"max":4789}}},
-    {"source":"0.0.0.0/0","protocol":"6","tcpOptions":{"destinationPortRange":{"min":2377,"max":2377}}},
-    {"source":"0.0.0.0/0","protocol":"17","udpOptions":{"destinationPortRange":{"min":7946,"max":7946}}},
-    {"source":"0.0.0.0/0","protocol":"17","udpOptions":{"destinationPortRange":{"min":4789,"max":4789}}},
-    {"source":"0.0.0.0/0","protocol":"17","udpOptions":{"destinationPortRange":{"min":2377,"max":2377}}},
+    {"source":"10.0.0.0/16","protocol":"6","tcpOptions":{"destinationPortRange":{"min":7946,"max":7946}}},
+    {"source":"10.0.0.0/16","protocol":"6","tcpOptions":{"destinationPortRange":{"min":4789,"max":4789}}},
+    {"source":"10.0.0.0/16","protocol":"6","tcpOptions":{"destinationPortRange":{"min":2377,"max":2377}}},
+    {"source":"10.0.0.0/16","protocol":"17","udpOptions":{"destinationPortRange":{"min":7946,"max":7946}}},
+    {"source":"10.0.0.0/16","protocol":"17","udpOptions":{"destinationPortRange":{"min":4789,"max":4789}}},
+    {"source":"10.0.0.0/16","protocol":"17","udpOptions":{"destinationPortRange":{"min":2377,"max":2377}}},
     {"source":"10.0.0.0/16","protocol":"6","tcpOptions":{"destinationPortRange":{"min":5432,"max":5432}}}
   ]' \
   --egress-security-rules '[{"destination":"0.0.0.0/0","protocol":"all"}]' \

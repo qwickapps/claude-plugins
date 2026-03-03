@@ -52,7 +52,7 @@ For developers who do not need OpenClaw. All resources go to app hosting.
 |---------|----------|-------|-----|----------|-----|
 | oci-main | apps-large | 2 | 12 GB | CapRover | apps.$DOMAIN |
 | oci-dev | dev-server | 1 | 6 GB | CapRover | dev.$DOMAIN |
-| oci-util | minimal | 1 | 6 GB | Docker only | (none) |
+| oci-util | custom | 1 | 6 GB | Docker only | (none) |
 
 **Boot storage:** 147 GB. 53 GB remaining.
 **Database:** Neon or Supabase (managed).
@@ -63,7 +63,7 @@ Maximum resources per VM. Choose what the second VM does.
 
 | VM Name | Template | OCPUs | RAM | Software | DNS |
 |---------|----------|-------|-----|----------|-----|
-| oci-main | apps-large | 3 | 18 GB | CapRover | apps.$DOMAIN |
+| oci-main | custom | 3 | 18 GB | CapRover | apps.$DOMAIN |
 | oci-claw | ai-assistant | 1 | 6 GB | OpenClaw | claw.$DOMAIN |
 
 **Boot storage:** 100 GB (50 x 2). 100 GB remaining.
@@ -90,8 +90,9 @@ Everything on one VM. Simplest setup, no isolation.
 CapRover PaaS for deploying web apps with automatic SSL.
 
 **Ports required (security list):**
-- TCP: 22, 80, 443, 3000, 996, 7946, 4789, 2377
-- UDP: 7946, 4789, 2377
+- TCP: 22, 80, 443, 3000, 996 from 0.0.0.0/0
+- TCP: 7946, 4789, 2377 from 10.0.0.0/16 (Docker Swarm -- VCN internal only)
+- UDP: 7946, 4789, 2377 from 10.0.0.0/16 (Docker Swarm -- VCN internal only)
 
 **DNS records:**
 - `apps.$DOMAIN` -> A record (proxied)
@@ -102,8 +103,9 @@ CapRover PaaS for deploying web apps with automatic SSL.
 CapRover instance for dev/staging builds, isolated from production. Same software as apps-large/apps-small but dedicated to non-production deploys.
 
 **Ports required (security list):**
-- TCP: 22, 80, 443, 3000, 996, 7946, 4789, 2377
-- UDP: 7946, 4789, 2377
+- TCP: 22, 80, 443, 3000, 996 from 0.0.0.0/0
+- TCP: 7946, 4789, 2377 from 10.0.0.0/16 (Docker Swarm -- VCN internal only)
+- UDP: 7946, 4789, 2377 from 10.0.0.0/16 (Docker Swarm -- VCN internal only)
 
 **DNS records:**
 - `dev.$DOMAIN` -> A record (proxied)

@@ -79,13 +79,7 @@ test -n "$CLOUDFLARE_DNS_TOKEN" && curl -s "https://api.cloudflare.com/client/v4
 ```
 If missing: Guide user to create API token at dash.cloudflare.com/profile/api-tokens
 
-### Check 4: Environment File
-```bash
-test -f ~/qwickapps-env.sh && echo "Env file: OK" || echo "Env file: MISSING"
-```
-If missing: Create from template in `${CLAUDE_PLUGIN_ROOT}/references/service-catalog.md`
-
-### Check 5: ARM Capacity
+### Check 4: ARM Capacity
 ```bash
 bash ${CLAUDE_PLUGIN_ROOT}/scripts/oci-check-capacity.sh
 ```

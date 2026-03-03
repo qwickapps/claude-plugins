@@ -76,12 +76,18 @@ ssh <vm-name> 'docker run -d \
   caprover/caprover'
 ```
 
-CapRover takes 1-2 minutes to initialize. Verify:
+CapRover takes 1-2 minutes to initialize. Poll until ready:
 ```bash
-ssh <vm-name> "sleep 90 && curl -s -o /dev/null -w '%{http_code}' http://localhost:3000"
+ssh <vm-name> 'for i in $(seq 1 12); do
+  STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000 2>/dev/null)
+  [ "$STATUS" = "200" ] || [ "$STATUS" = "302" ] && echo "CapRover: HTTP $STATUS (ready)" && exit 0
+  echo "Waiting for CapRover... (attempt $i/12)"
+  sleep 10
+done
+echo "CapRover: not responding after 120s" && exit 1'
 ```
 
-Expected: HTTP 200 or 302.
+Expected: HTTP 200 or 302 within 2 minutes.
 
 **Default CapRover password:** `captain42` (change immediately via dashboard).
 
@@ -147,17 +153,17 @@ For 12 GB RAM (db-standard with 2 OCPU), use:
 
 ### Step 4: Create Users and Databases
 
-Generate a strong random password and create the application user. The password is passed via stdin to avoid exposure in process lists or shell history:
+Generate a strong random password on the remote VM and create the application user. The password is generated and consumed entirely on the remote machine to avoid exposure in local process lists, SSH command lines, or shell history:
 
 ```bash
+# Generate password on the remote VM, create user, and print the password once
+ssh <vm-name> 'bash -s' << 'PG_USER'
 APP_PASSWORD=$(openssl rand -base64 24 | tr -d '/+=' | head -c 32)
-echo "Generated password: $APP_PASSWORD"
-echo "(Save this password now -- it will not be shown again)"
-
-# Create user with least privileges (password passed via stdin, not CLI args)
-ssh <vm-name> "sudo -u postgres psql" << SQL
-CREATE USER appuser WITH PASSWORD '$APP_PASSWORD';
-SQL
+sudo -u postgres psql -c "CREATE USER appuser WITH PASSWORD '${APP_PASSWORD}';"
+echo "=== SAVE THIS PASSWORD ==="
+echo "APP_PASSWORD=${APP_PASSWORD}"
+echo "=== (will not be shown again) ==="
+PG_USER
 
 ssh <vm-name> "sudo -u postgres psql -c \"CREATE DATABASE appdb OWNER appuser;\""
 ssh <vm-name> "sudo -u postgres psql -c \"CREATE DATABASE clawdb OWNER appuser;\""
