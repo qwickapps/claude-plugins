@@ -34,8 +34,9 @@ Read these reference files from `${CLAUDE_PLUGIN_ROOT}/references/`:
 
 Check if a pre-built split matches the requirements:
 
+- **Managed DB** (recommended for dev): Apps + AI, database on Neon (no db VM, frees resources)
 - **Full Stack**: Apps + self-hosted DB + AI assistant
-- **Apps Focused**: Apps + self-hosted DB + utility VM (spare capacity for custom Docker workloads, no pre-installed software)
+- **Apps Focused**: Apps + self-hosted DB + utility VM (spare capacity for custom Docker workloads)
 - **DB Focused**: Light apps + heavy DB + AI
 - **Single VM**: Everything on one machine (simplest)
 
@@ -45,10 +46,12 @@ If a pre-built split matches well, use it as the starting recommendation.
 
 Adjust the split if requirements don't fit a pre-built template:
 
+- Managed DB (Neon/Supabase)? No db VM needed. Give freed resources to apps.
 - No database needed? Redistribute those resources to apps.
 - No AI assistant? More resources for apps or DB.
 - Heavy database workload? Give DB more OCPUs/RAM.
 - Many web apps? Give apps-large more RAM.
+- Multiple independent projects? Neon is strongly preferred (unlimited projects, one DB per app).
 
 **Constraints (must never exceed):**
 - Total OCPUs: 4

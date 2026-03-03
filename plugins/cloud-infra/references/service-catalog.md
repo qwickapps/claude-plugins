@@ -7,6 +7,7 @@ Reference for free SaaS services used alongside OCI free-tier infrastructure.
 | Service | Free Tier | API Key Location | Use Case |
 |---------|-----------|-----------------|----------|
 | Cloudflare | Unlimited DNS, CDN, DDoS protection | dash.cloudflare.com/profile/api-tokens | DNS + SSL + CDN |
+| Neon | Unlimited projects, 0.5 GiB storage, auto-suspend | Console > Connection Details | Primary dev Postgres |
 | Supabase | 500 MB DB, 2 projects | Settings > API | Managed Postgres |
 | Upstash | 256 MB, 500K commands/month | Console > Database | Redis cache |
 | Resend | 3,000 emails/month, 100/day | API Keys page | Transactional email |
@@ -46,9 +47,64 @@ curl -X POST "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns
   --data '{"type":"A","name":"apps","content":"<IP>","proxied":true}'
 ```
 
+## Neon (Recommended for Dev DB)
+
+**Purpose:** Managed PostgreSQL for development. Replaces the self-hosted oci-db VM, freeing 1 OCPU / 6 GB for apps or AI.
+
+**Why Neon over self-hosted or Supabase:**
+- Unlimited projects on free tier (one per app: qwickbrain, faabzi, trinity, etc.)
+- Auto-suspend on idle -- no cost, no Oracle idle reclamation concerns
+- Database branching -- test migrations on a branch before applying to main
+- Upgrade path: Neon Pro ($19/month) or Supabase Pro ($25/month) when an app generates revenue
+
+**Free tier includes:**
+- Unlimited projects
+- 0.5 GiB storage per project
+- 1 compute endpoint per project (auto-suspends after 5 min idle)
+- 100 hours of compute per month (shared across projects)
+- Branching (create DB branches for migration testing)
+
+**Limitations:**
+- 0.5 GiB storage per project (sufficient for dev, not production data)
+- Single compute region per project
+- Auto-suspend means cold starts (~1-2s on first query after idle)
+
+**Setup requirements:**
+1. Account at console.neon.tech (sign up with GitHub)
+2. Create a project per app (choose closest region to your OCI VMs)
+3. Collect connection string from Connection Details page
+
+**Environment variables:**
+```
+NEON_API_KEY=<api-key>
+DATABASE_URL=postgresql://<user>:<password>@<host>.neon.tech/<dbname>?sslmode=require
+```
+
+**Branching workflow:**
+```bash
+# Create a branch for testing migrations
+neonctl branches create --project-id <id> --name migration-test
+
+# Get the branch connection string
+neonctl connection-string --project-id <id> --branch migration-test
+
+# Run migrations against the branch
+DATABASE_URL="<branch-url>" npm run migrate
+
+# If successful, apply to main branch. If not, delete the branch.
+neonctl branches delete --project-id <id> --branch migration-test
+```
+
+**Graduation path:**
+When an app generates revenue, upgrade to:
+- Neon Pro ($19/month): 10 GiB storage, autoscaling, more compute hours
+- Supabase Pro ($25/month): 8 GB storage, auth, file storage, edge functions
+
+---
+
 ## Supabase (Optional)
 
-**Purpose:** Managed PostgreSQL alternative. Use instead of self-hosted oci-db if you prefer managed.
+**Purpose:** Managed PostgreSQL with extras (auth, file storage, edge functions). Good for prototyping apps that need more than just a database.
 
 **Free tier includes:**
 - 2 projects
@@ -131,6 +187,12 @@ export OCI_SSH_PUBLIC_KEY_PATH="$HOME/.ssh/id_oci.pub"
 export CLOUDFLARE_DNS_TOKEN=""
 export CLOUDFLARE_ZONE_ID=""
 export MY_DOMAIN=""
+
+# Neon (recommended for dev databases)
+export NEON_API_KEY=""
+# Add per-project DATABASE_URLs as needed:
+# export FAABZI_DATABASE_URL="postgresql://...@....neon.tech/faabzi?sslmode=require"
+# export QWICKBRAIN_DATABASE_URL="postgresql://...@....neon.tech/qwickbrain?sslmode=require"
 
 # Supabase (optional)
 export SUPABASE_URL=""

@@ -25,9 +25,10 @@ What will you host on your cloud infrastructure?
 **Question 2 -- Database**
 ```
 How do you want to handle databases?
-- Self-hosted PostgreSQL on a dedicated VM (recommended, more control)
-- Managed Supabase (free tier, 500 MB, pauses after 7 days idle)
-- Both (self-hosted primary + Supabase for prototyping)
+- Managed Neon (recommended -- unlimited projects, auto-suspend, branch for migrations)
+- Self-hosted PostgreSQL on a dedicated VM (more control, uses 1 OCPU / 6 GB)
+- Managed Supabase (500 MB free, 2 projects, pauses after 7 days idle)
+- Self-hosted primary + managed for prototyping
 - No database needed
 ```
 
@@ -78,6 +79,7 @@ After collecting requirements, map to VM templates from `${CLAUDE_PLUGIN_ROOT}/r
 |-------------|----------|-------|
 | Web apps / APIs / static sites | `apps-large` or `apps-small` | Large if multiple apps or production traffic |
 | Self-hosted PostgreSQL | `db-standard` | 1 OCPU / 6 GB default, 2 OCPU / 12 GB for heavy workloads |
+| Managed Neon or Supabase | No VM needed | Frees 1 OCPU / 6 GB for apps or AI |
 | OpenClaw (dedicated) | `ai-assistant` | 1 OCPU / 6 GB |
 | OpenClaw (co-located) | N/A | Installed alongside CapRover on apps VM |
 | No specific needs | `minimal` | Docker-only, configure later |

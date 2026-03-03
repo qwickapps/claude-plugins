@@ -52,6 +52,20 @@ Maximizes database resources. Good for data-heavy workloads.
 
 **Boot storage:** 150 GB. 50 GB remaining.
 
+### Managed DB (recommended for dev)
+
+Uses Neon (or Supabase) instead of a self-hosted database VM. Frees 1 OCPU / 6 GB for a larger apps VM.
+
+| VM Name | Template | OCPUs | RAM | Software |
+|---------|----------|-------|-----|----------|
+| oci-apps | apps-large | 3 | 18 GB | CapRover |
+| oci-claw | ai-assistant | 1 | 6 GB | OpenClaw |
+
+**Boot storage:** 100 GB (50 x 2). 100 GB remaining for block volumes.
+**Database:** Neon free tier (unlimited projects, auto-suspend, branching).
+
+**Trade-off:** Database is off-VM. Cold starts (~1-2s) after idle. 0.5 GiB storage per project. Graduate to Neon Pro ($19/month) or Supabase Pro ($25/month) when an app generates revenue.
+
 ### Single VM
 
 Everything on one VM. Simplest setup, least isolation.
