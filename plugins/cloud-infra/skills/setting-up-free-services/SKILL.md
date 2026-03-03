@@ -1,6 +1,6 @@
 ---
 name: setting-up-free-services
-description: "This skill should be used when setting up free SaaS accounts (Supabase, Upstash, Resend) alongside OCI infrastructure. Provides step-by-step guidance for account creation and API key collection. Account creation is manual; this skill collects credentials and saves them. Trigger phrases: 'set up Supabase', 'configure Upstash', 'set up Resend', 'free tier services', 'SaaS accounts'."
+description: "This skill should be used when setting up free SaaS accounts (Cloudflare R2, Backblaze B2, Supabase, Upstash, Resend) alongside OCI infrastructure. Provides step-by-step guidance for account creation, storage bucket setup, and API key collection. Account creation is manual; this skill collects credentials and saves them. Trigger phrases: 'set up storage', 'configure R2', 'set up Supabase', 'configure Upstash', 'set up Resend', 'free tier services', 'SaaS accounts'."
 ---
 
 # Setting Up Free Services
@@ -19,6 +19,8 @@ Ask the user which services they need:
 
 ```
 Which free services do you want to set up?
+- Cloudflare R2 (recommended -- 10 GB object storage, zero egress, S3-compatible)
+- Backblaze B2 (10 GB free, cheap bulk storage for backups and large files)
 - Neon (recommended -- managed Postgres, unlimited projects, auto-suspend, branching)
 - Supabase (managed Postgres with auth, storage, edge functions)
 - Upstash (serverless Redis -- caching, sessions, rate limiting)
@@ -26,6 +28,152 @@ Which free services do you want to set up?
 - All of the above
 - None (skip this step)
 ```
+
+## Cloudflare R2 Setup
+
+**When to use:** Primary object storage for user uploads (profile images, documents) and app assets (logos, product images). Recommended for all deployments.
+
+### Instructions for the User
+
+1. Go to dash.cloudflare.com
+2. Click **R2 Object Storage** in the sidebar
+3. If prompted, add payment method (required for R2, but free tier has no charges)
+4. Click **Create bucket**
+5. Name: choose a name (e.g., "myapp-storage" or your domain name)
+6. Location: Automatic (or closest to your OCI region)
+7. Click **Create bucket**
+
+### Enable Public Access (Optional)
+
+Only enable public access for buckets containing non-sensitive files (app assets, public images). Sensitive user uploads (private documents, personal images) should remain in a private bucket and be served via presigned URLs from your application.
+
+If the bucket needs public read access:
+
+1. In the bucket settings, go to **Settings** tab
+2. Under **Custom Domains**, click **Connect Domain**
+3. Enter a subdomain (e.g., `cdn.yourdomain.com`)
+4. Cloudflare handles the DNS binding internally -- no manual CNAME needed
+
+The R2.dev subdomain is also available under **Public access** but is not recommended for production (no Cloudflare caching, rate-limited).
+
+### Generate R2 API Token
+
+1. In the R2 dashboard, click **Manage R2 API Tokens**
+2. Click **Create API token**
+3. Token name: "cloud-infra" (or any name)
+4. Permissions: **Object Read & Write**
+5. Specify bucket: select your bucket (or all buckets)
+6. Click **Create API Token**
+7. Copy: Access Key ID, Secret Access Key
+
+Also note the **Account ID** from the R2 dashboard URL or the Cloudflare dashboard sidebar.
+
+### Collect Credentials
+
+Ask the user to provide:
+- **Account ID**: From the Cloudflare dashboard
+- **Access Key ID**: From the R2 API token
+- **Secret Access Key**: From the R2 API token (shown only once)
+- **Bucket name**: The bucket they created
+
+### Save to Environment File
+
+Ensure the env file has restrictive permissions (credentials in plaintext):
+
+```bash
+touch ~/my-cloud-env.sh && chmod 600 ~/my-cloud-env.sh
+cat >> ~/my-cloud-env.sh << 'EOF'
+
+# Cloudflare R2
+export R2_ACCOUNT_ID="<provided-account-id>"
+export R2_ACCESS_KEY_ID="<provided-access-key>"
+export R2_SECRET_ACCESS_KEY="<provided-secret-key>"
+export R2_BUCKET_NAME="<provided-bucket-name>"
+EOF
+```
+
+### Verify Connection
+
+```bash
+# Verify with the AWS CLI configured for R2 (empty bucket returns no output, which is OK):
+aws s3 ls s3://$R2_BUCKET_NAME/ \
+  --endpoint-url "https://$R2_ACCOUNT_ID.r2.cloudflarestorage.com" \
+  && echo "R2: OK" || echo "R2: FAILED (check credentials and endpoint above)"
+```
+
+If the user does not have the AWS CLI, verify from the Cloudflare dashboard instead.
+
+### R2 Notes
+
+- S3-compatible: use `@aws-sdk/client-s3` with the R2 endpoint
+- Endpoint: `https://<account-id>.r2.cloudflarestorage.com`
+- Zero egress fees permanently -- no surprise bills
+- Recommended bucket structure: `/uploads/` for user content, `/assets/` for app assets
+- For Supabase projects, use Supabase Storage instead (co-located with DB, RLS applies)
+
+---
+
+## Backblaze B2 Setup
+
+**When to use:** Cheap bulk storage for database backups, large files, or video. Pairs with Cloudflare for free egress via the Bandwidth Alliance.
+
+### Instructions for the User
+
+1. Go to https://www.backblaze.com/sign-up/cloud-storage
+2. Sign up with email
+3. Click **Create a Bucket**
+4. Bucket name: choose a globally unique name (e.g., "myapp-backups")
+5. Files in bucket: **Private** (for backups) or **Public** (for served files)
+6. Default encryption: **Enable** (required for backup buckets, recommended for all)
+7. Click **Create a Bucket**
+
+### Generate Application Key
+
+1. Go to **App Keys** in the B2 dashboard
+2. Click **Add a New Application Key**
+3. Name: "cloud-infra" (or any name)
+4. Allow access to bucket: select your bucket
+5. Type of access: **Read and Write**
+6. Click **Create New Key**
+7. Copy: keyID and applicationKey (shown only once)
+
+### Collect Credentials
+
+Ask the user to provide:
+- **Key ID**: The `keyID` from the application key
+- **Application Key**: The `applicationKey` (shown only once)
+- **Bucket name**: The bucket they created
+- **Endpoint**: Shown in bucket details without the scheme (e.g., `s3.us-west-004.backblazeb2.com` -- do not include `https://`, the save step adds it)
+
+### Save to Environment File
+
+```bash
+cat >> ~/my-cloud-env.sh << 'EOF'
+
+# Backblaze B2
+export B2_KEY_ID="<provided-key-id>"
+export B2_APPLICATION_KEY="<provided-application-key>"
+export B2_BUCKET_NAME="<provided-bucket-name>"
+export B2_ENDPOINT="https://<provided-endpoint>"
+EOF
+```
+
+### Verify Connection
+
+```bash
+aws s3 ls s3://$B2_BUCKET_NAME/ \
+  --endpoint-url "$B2_ENDPOINT" \
+  && echo "B2: OK" || echo "B2: FAILED (check credentials and endpoint above)"
+```
+
+### B2 Notes
+
+- 10 GB free forever, then $0.006/GB/month
+- Free egress when served through Cloudflare (Bandwidth Alliance). Direct server-to-bucket downloads (e.g., restoring a backup to an OCI VM) are not covered and incur standard B2 egress at $0.01/GB.
+- S3-compatible API
+- Best for: database dumps, config backups, large file archives, video storage
+
+---
 
 ## Neon Setup
 
@@ -300,6 +448,17 @@ After all services are configured:
 
 ```
 === Free Services Summary ===
+
+Cloudflare R2:
+  Bucket: $R2_BUCKET_NAME
+  Endpoint: https://$R2_ACCOUNT_ID.r2.cloudflarestorage.com
+  Status: [verified/skipped]
+  Limits: 10 GB, zero egress
+
+Backblaze B2:
+  Bucket: $B2_BUCKET_NAME
+  Status: [verified/skipped]
+  Limits: 10 GB free, then $0.006/GB
 
 Neon:
   Projects: [list of created projects]

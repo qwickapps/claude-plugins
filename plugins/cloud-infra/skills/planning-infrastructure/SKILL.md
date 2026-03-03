@@ -47,7 +47,17 @@ Do you want an AI assistant (OpenClaw)?
 - No AI assistant
 ```
 
-**Question 5 -- Traffic Level**
+**Question 5 -- Storage**
+```
+How do you want to handle file storage (user uploads, app assets)?
+- Cloudflare R2 (recommended -- 10 GB free, zero egress, S3-compatible; requires payment method on Cloudflare, no charges on free tier)
+- Backblaze B2 (10 GB free, cheap for backups and large files)
+- Supabase Storage (1 GB free, co-located with Supabase DB, RLS policies)
+- R2 for primary + B2 for backups (recommended combo)
+- No file storage needed
+```
+
+**Question 6 -- Traffic Level**
 ```
 What traffic level do you expect?
 - Hobby / personal dev (low traffic, few users)
@@ -55,7 +65,7 @@ What traffic level do you expect?
 - Production (higher traffic, needs reliability)
 ```
 
-**Question 6 -- Existing Accounts**
+**Question 7 -- Existing Accounts**
 ```
 Which accounts do you already have? (select all that apply)
 - Oracle Cloud account (with OCI CLI configured)
@@ -99,6 +109,7 @@ Pass the structured requirements to the `infra-planner` agent for VM allocation 
 - `appTypes`: list of app types selected
 - `devProdSeparation`: yes or no
 - `database`: self-hosted, neon, supabase, both, or none
+- `storage`: r2, b2, supabase-storage, r2-and-b2, or none
 - `aiAssistant`: dedicated, co-located, or none
 - `trafficLevel`: hobby, small-team, or production
 - `existingAccounts`: list of accounts already set up

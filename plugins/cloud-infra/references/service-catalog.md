@@ -7,8 +7,10 @@ Reference for free SaaS services used alongside OCI free-tier infrastructure.
 | Service | Free Tier | API Key Location | Use Case |
 |---------|-----------|-----------------|----------|
 | Cloudflare | Unlimited DNS, CDN, DDoS protection | dash.cloudflare.com/profile/api-tokens | DNS + SSL + CDN |
+| Cloudflare R2 | 10 GB, zero egress, S3-compatible | dash.cloudflare.com > R2 > API Tokens | Object storage (primary) |
 | Neon | Unlimited projects, 0.5 GiB storage, auto-suspend | Console > Connection Details | Primary dev Postgres |
 | Supabase | 500 MB DB, 2 projects | Settings > API | Managed Postgres |
+| Backblaze B2 | 10 GB, free egress via Cloudflare | secure.backblaze.com > App Keys | Backups, large files |
 | Upstash | 256 MB, 500K commands/month | Console > Database | Redis cache |
 | Resend | 3,000 emails/month, 100/day | API Keys page | Transactional email |
 | OCI | 4 OCPU, 24 GB ARM | ~/.oci/config | Compute + storage |
@@ -169,6 +171,119 @@ UPSTASH_REDIS_REST_TOKEN=<token>
 RESEND_API_KEY=re_xxxx
 ```
 
+## Cloudflare R2 (Recommended for Storage)
+
+**Purpose:** S3-compatible object storage for user uploads, app assets, product images, documents.
+
+**Why R2 over alternatives:**
+- Zero egress fees (S3, GCS, and Firebase charge per GB downloaded -- adds up fast)
+- S3-compatible API -- any existing S3 SDK (aws-sdk, @aws-sdk/client-s3) works as-is
+- 10 GB permanently free (not a 12-month trial like AWS S3)
+- Workers integration for edge image transforms if needed later
+- Already on Cloudflare for DNS/CDN, so no new vendor
+
+**Free tier includes:**
+- 10 GB storage
+- 1,000,000 Class A operations/month (PUT, POST, LIST)
+- 10,000,000 Class B operations/month (GET)
+- Zero egress fees (permanently)
+
+**Limitations:**
+- Requires Cloudflare account with a domain for public bucket access
+- No built-in image transformation on free tier (use Workers or client-side)
+
+**Setup requirements:**
+1. Cloudflare dashboard > R2 > Create bucket
+2. Generate R2 API token (separate from DNS token) with Object Read & Write permissions
+3. Collect: Account ID, Access Key ID, Secret Access Key, bucket name
+
+**Environment variables:**
+```
+R2_ACCOUNT_ID=<cloudflare-account-id>
+R2_ACCESS_KEY_ID=<access-key>
+R2_SECRET_ACCESS_KEY=<secret-key>
+R2_BUCKET_NAME=<bucket-name>
+```
+
+**S3-compatible endpoint:** `https://<account-id>.r2.cloudflarestorage.com`
+**Public access:** Use a custom domain via R2 > Settings > Custom Domains (Cloudflare handles DNS internally).
+
+**Recommended bucket structure:**
+```
+my-bucket/
+  uploads/          # User-generated content (profile pics, documents)
+  assets/           # App assets (logos, product images)
+  backups/          # Database dumps, config backups (private)
+```
+
+**Use case mapping:**
+
+| Use Case | Solution |
+|----------|----------|
+| User profile pics, documents | Cloudflare R2 |
+| App assets (logos, product images) | Cloudflare R2 (same bucket, `/assets` prefix) |
+| Projects already on Supabase | Supabase Storage (keep co-located with DB) |
+| Backups, large files, video | Backblaze B2 |
+
+---
+
+## Backblaze B2 (Optional -- Backups and Large Files)
+
+**Purpose:** Cheap bulk storage for backups, large files, video. Pairs with Cloudflare for free egress via the Bandwidth Alliance.
+
+**Free tier includes:**
+- 10 GB storage (permanently free)
+- Then $0.006/GB/month (very cheap)
+- Free egress when paired with Cloudflare (Bandwidth Alliance)
+
+**Limitations:**
+- S3-compatible API available but some edge cases differ
+- Free tier smaller than R2 for active use
+- Best suited for infrequent-access data (backups, archives)
+
+**Setup requirements:**
+1. Account at backblaze.com
+2. Create a B2 bucket
+3. Generate application key with read/write access to the bucket
+4. Collect: Key ID, Application Key, bucket name, endpoint
+
+**Environment variables:**
+```
+B2_KEY_ID=<key-id>
+B2_APPLICATION_KEY=<application-key>
+B2_BUCKET_NAME=<bucket-name>
+B2_ENDPOINT=https://s3.<region>.backblazeb2.com
+```
+
+---
+
+## Supabase Storage (Co-Located with Supabase DB)
+
+**Purpose:** File storage for projects already using Supabase as their database. Postgres-native RLS policies apply to files.
+
+**Free tier includes:**
+- 1 GB file storage per project
+- RLS policies on storage buckets (same auth as database)
+- Image transformations (limited on free tier)
+
+**When to use:** Only if the project is already on Supabase for its database. Using Supabase Storage without Supabase DB adds unnecessary complexity.
+
+**No additional setup needed** -- storage is available in the Supabase project dashboard under Storage. Uses the same `SUPABASE_URL` and keys.
+
+---
+
+## Storage Options to Avoid
+
+| Service | Why Avoid |
+|---------|-----------|
+| AWS S3 | Free tier is 12 months only, then pay. Egress fees add up. |
+| Firebase Storage | Google Cloud egress fees hurt at scale. |
+| Imgur / Cloudinary free tiers | Too restrictive for production use. |
+
+**Worth watching:** Tigris (5 GB free, S3-compatible, globally distributed, Fly.io add-on). Not included because R2 already covers the same use case with a larger free tier.
+
+---
+
 ## Environment File Template
 
 Save as `my-cloud-env.sh` (do not commit to git):
@@ -193,6 +308,17 @@ export NEON_API_KEY=""
 # Add per-project DATABASE_URLs as needed:
 # export FAABZI_DATABASE_URL="postgresql://...@....neon.tech/faabzi?sslmode=require"
 # export QWICKBRAIN_DATABASE_URL="postgresql://...@....neon.tech/qwickbrain?sslmode=require"
+
+# Cloudflare R2 (recommended for storage)
+export R2_ACCOUNT_ID=""
+export R2_ACCESS_KEY_ID=""
+export R2_SECRET_ACCESS_KEY=""
+export R2_BUCKET_NAME=""
+
+# Backblaze B2 (optional -- backups, large files)
+# export B2_KEY_ID=""
+# export B2_APPLICATION_KEY=""
+# export B2_BUCKET_NAME=""
 
 # Supabase (optional)
 export SUPABASE_URL=""
