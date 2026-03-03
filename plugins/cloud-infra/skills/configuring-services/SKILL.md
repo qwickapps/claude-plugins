@@ -7,6 +7,8 @@ description: "This skill should be used when installing and configuring software
 
 SSH into each VM and install the appropriate software stack. Each section is standalone -- only execute sections that match the VM allocation.
 
+Read `~/qwickapps-topology.yml` if it exists. The topology file lists which VMs exist and their current software. Skip configuration for VMs already marked with a `status: running` and matching software in the topology file (they were configured in a previous run).
+
 <HARD-GATE>
 Before running any commands on a VM, verify SSH access works. If SSH fails, stop and troubleshoot before proceeding.
 </HARD-GATE>

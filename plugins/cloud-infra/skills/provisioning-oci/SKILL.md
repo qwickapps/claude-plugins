@@ -11,6 +11,21 @@ Step-by-step OCI provisioning via CLI. Every command that creates or modifies re
 NEVER execute OCI CLI commands that create, modify, or delete resources without explicit user confirmation. Present the command, explain what it does, and wait for approval.
 </HARD-GATE>
 
+## Check Existing Topology
+
+Before creating any resources, read `~/qwickapps-topology.yml` if it exists:
+
+```bash
+test -f ~/qwickapps-topology.yml && echo "Topology file: EXISTS" || echo "Topology file: NOT FOUND (fresh provisioning)"
+```
+
+If the topology file exists:
+- **VCN/subnet already created:** Reuse the OCIDs from the file. Do not create a new VCN.
+- **Some VMs already exist:** Only create VMs that are not already listed.
+- **Resource budget partially consumed:** Subtract existing allocations from the free-tier budget.
+
+Present existing infrastructure to the user before proceeding.
+
 ## Prerequisites
 
 Before starting, verify all prerequisites. If any fail, stop and guide the user to fix them.

@@ -11,6 +11,10 @@ Create Cloudflare DNS records pointing your domain to OCI VM public IPs.
 NEVER create or modify DNS records without explicit user confirmation. Present each record, explain what it does, and wait for approval.
 </HARD-GATE>
 
+## Check Existing Topology
+
+Read `~/qwickapps-topology.yml` if it exists. The topology file lists which VMs have DNS records and their public IPs. Only create records for VMs that exist in the allocation. Skip records that are already listed in the topology file (they were created in a previous run).
+
 ## Prerequisites
 
 Verify before starting:
