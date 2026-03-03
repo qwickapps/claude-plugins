@@ -75,7 +75,43 @@ curl -X POST "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns
 
 Result: `*.apps.$MY_DOMAIN` resolves directly to the apps VM. CapRover uses this wildcard to route deployed apps and provision Let's Encrypt SSL certificates. Must be DNS-only (not proxied) for CapRover's SSL to work.
 
-### Database Server
+### Dev Server (CapRover for Dev/Staging)
+
+Two records needed (same pattern as the production app server):
+
+**1. Main A record (proxied):**
+```bash
+curl -X POST "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records" \
+  -H "Authorization: Bearer $CLOUDFLARE_DNS_TOKEN" \
+  -H "Content-Type: application/json" \
+  --data '{
+    "type": "A",
+    "name": "dev",
+    "content": "<DEV_PUBLIC_IP>",
+    "proxied": true,
+    "ttl": 1
+  }'
+```
+
+**2. Wildcard A record (DNS only, NOT proxied):**
+```bash
+curl -X POST "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records" \
+  -H "Authorization: Bearer $CLOUDFLARE_DNS_TOKEN" \
+  -H "Content-Type: application/json" \
+  --data '{
+    "type": "A",
+    "name": "*.dev",
+    "content": "<DEV_PUBLIC_IP>",
+    "proxied": false,
+    "ttl": 300
+  }'
+```
+
+Result: `dev.$MY_DOMAIN` and `*.dev.$MY_DOMAIN` resolve to the dev VM. CapRover on this VM manages dev/staging instances independently from production.
+
+### Database Server (Self-Hosted PostgreSQL)
+
+Only needed if the allocation includes a `db-standard` VM.
 
 **A record (DNS only):**
 ```bash
@@ -117,6 +153,8 @@ Result: `claw.$MY_DOMAIN` resolves to the OpenClaw VM.
 |--------|---------|-----|
 | `apps.$DOMAIN` | Yes | Benefits from Cloudflare CDN, DDoS protection |
 | `*.apps.$DOMAIN` | No | CapRover needs direct IP for SSL certificate provisioning |
+| `dev.$DOMAIN` | Yes | Benefits from Cloudflare CDN, DDoS protection |
+| `*.dev.$DOMAIN` | No | CapRover needs direct IP for SSL certificate provisioning |
 | `db.$DOMAIN` | No | Non-HTTP traffic (PostgreSQL port 5432) |
 | `claw.$DOMAIN` | No | Direct access needed for Telegram webhook |
 
@@ -125,9 +163,11 @@ Result: `claw.$MY_DOMAIN` resolves to the OpenClaw VM.
 After creating records, verify each one resolves:
 
 ```bash
-# Check each record
+# Check each record (only check records that were created)
 dig +short apps.$MY_DOMAIN
 dig +short test.apps.$MY_DOMAIN
+dig +short dev.$MY_DOMAIN
+dig +short test.dev.$MY_DOMAIN
 dig +short db.$MY_DOMAIN
 dig +short claw.$MY_DOMAIN
 ```
@@ -163,18 +203,24 @@ After all records are created:
 ```
 === DNS Configuration Summary ===
 
-Records Created:
+Records Created (only records matching the VM allocation):
   apps.$MY_DOMAIN       -> <IP> (proxied, Cloudflare CDN)
   *.apps.$MY_DOMAIN     -> <IP> (DNS only, CapRover wildcard)
+  dev.$MY_DOMAIN        -> <IP> (proxied, Cloudflare CDN)
+  *.dev.$MY_DOMAIN      -> <IP> (DNS only, CapRover wildcard)
   db.$MY_DOMAIN         -> <IP> (DNS only)
   claw.$MY_DOMAIN       -> <IP> (DNS only)
 
 Verification:
   [dig output for each record]
 
-CapRover Dashboard: http://apps.$MY_DOMAIN:3000
+CapRover Dashboards:
+  Production: http://apps.$MY_DOMAIN:3000
+  Dev/Staging: http://dev.$MY_DOMAIN:3000
+
 SSH Access:
-  ssh oci-apps  (or: ssh ubuntu@apps.$MY_DOMAIN)
+  ssh oci-main  (or: ssh ubuntu@apps.$MY_DOMAIN)
+  ssh oci-dev   (or: ssh ubuntu@dev.$MY_DOMAIN)
   ssh oci-db    (or: ssh ubuntu@db.$MY_DOMAIN)
   ssh oci-claw  (or: ssh ubuntu@claw.$MY_DOMAIN)
 ```

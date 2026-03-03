@@ -16,7 +16,8 @@ Analyze a developer's infrastructure requirements and produce an optimal VM allo
 You receive structured requirements from the `planning-infrastructure` skill. The requirements include:
 
 - **App types**: Web apps, APIs, static sites, AI tools
-- **Database needs**: Self-hosted PostgreSQL, managed Supabase, both, or none
+- **Dev/prod separation**: Whether dev builds should be isolated from production
+- **Database needs**: Self-hosted PostgreSQL, managed Neon, managed Supabase, both, or none
 - **AI assistant**: Whether OpenClaw + Telegram bot is wanted
 - **Traffic level**: Hobby/dev, small team, or production
 - **Existing accounts**: OCI, Cloudflare, domain ownership status
@@ -34,10 +35,10 @@ Read these reference files from `${CLAUDE_PLUGIN_ROOT}/references/`:
 
 Check if a pre-built split matches the requirements:
 
-- **Managed DB** (recommended for dev): Apps + AI, database on Neon (no db VM, frees resources)
-- **Full Stack**: Apps + self-hosted DB + AI assistant
-- **Apps Focused**: Apps + self-hosted DB + utility VM (spare capacity for custom Docker workloads)
-- **DB Focused**: Light apps + heavy DB + AI
+- **Prod + Dev + AI** (recommended): Prod CapRover + Dev CapRover + OpenClaw, DB on Neon
+- **Prod + DB + AI**: Prod CapRover + self-hosted PostgreSQL + OpenClaw
+- **Prod + Dev** (no AI): Prod CapRover + Dev CapRover + utility VM, DB on Neon
+- **Two VMs Only**: Large prod CapRover + one other (dev, db, or ai)
 - **Single VM**: Everything on one machine (simplest)
 
 If a pre-built split matches well, use it as the starting recommendation.
@@ -46,12 +47,13 @@ If a pre-built split matches well, use it as the starting recommendation.
 
 Adjust the split if requirements don't fit a pre-built template:
 
-- Managed DB (Neon/Supabase)? No db VM needed. Give freed resources to apps.
-- No database needed? Redistribute those resources to apps.
-- No AI assistant? More resources for apps or DB.
+- Dev/prod separation requested? Add a `dev-server` VM. This is the most common reason to use 3 VMs.
+- Managed DB (Neon/Supabase)? No db VM needed. Give freed resources to apps or dev.
+- Self-hosted DB? Add a `db-standard` VM instead of (or alongside) dev-server.
+- No AI assistant? Redistribute 1 OCPU / 6 GB to apps or dev.
 - Heavy database workload? Give DB more OCPUs/RAM.
-- Many web apps? Give apps-large more RAM.
-- Multiple independent projects? Neon is strongly preferred (unlimited projects, one DB per app).
+- Multiple independent projects? Neon is preferred (unlimited projects, one DB per app).
+- Frequent dev builds? Isolate dev from prod -- CPU spikes from builds degrade prod and create unpredictable Oracle reclamation risk.
 
 **Constraints (must never exceed):**
 - Total OCPUs: 4
@@ -127,5 +129,5 @@ Identify potential issues:
 - Never recommend allocations exceeding free-tier limits
 - Always include idle-protection cron in every VM
 - Always recommend reserved IPs for VMs that need stable DNS
-- Default to the "Full Stack" split unless requirements clearly point elsewhere
+- Default to the "Prod + Dev + AI" split unless requirements clearly point elsewhere
 - If uncertain, recommend the simpler split and note that resources can be redistributed later (destroy and recreate VMs)

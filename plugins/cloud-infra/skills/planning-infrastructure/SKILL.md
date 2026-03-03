@@ -22,7 +22,14 @@ What will you host on your cloud infrastructure?
 - All of the above (recommended)
 ```
 
-**Question 2 -- Database**
+**Question 2 -- Dev/Prod Separation**
+```
+Do you want separate VMs for production and dev/staging?
+- Yes, separate VMs (recommended -- dev builds spike CPU, isolate from prod)
+- No, single VM for both (simpler, but dev builds affect prod performance)
+```
+
+**Question 3 -- Database**
 ```
 How do you want to handle databases?
 - Managed Neon (recommended -- unlimited projects, auto-suspend, branch for migrations)
@@ -32,7 +39,7 @@ How do you want to handle databases?
 - No database needed
 ```
 
-**Question 3 -- AI Assistant**
+**Question 4 -- AI Assistant**
 ```
 Do you want an AI assistant (OpenClaw)?
 - Yes, with Telegram bot (recommended, 1 OCPU / 6 GB dedicated VM)
@@ -40,7 +47,7 @@ Do you want an AI assistant (OpenClaw)?
 - No AI assistant
 ```
 
-**Question 4 -- Traffic Level**
+**Question 5 -- Traffic Level**
 ```
 What traffic level do you expect?
 - Hobby / personal dev (low traffic, few users)
@@ -48,7 +55,7 @@ What traffic level do you expect?
 - Production (higher traffic, needs reliability)
 ```
 
-**Question 5 -- Existing Accounts**
+**Question 6 -- Existing Accounts**
 ```
 Which accounts do you already have? (select all that apply)
 - Oracle Cloud account (with OCI CLI configured)
@@ -77,9 +84,10 @@ After collecting requirements, map to VM templates from `${CLAUDE_PLUGIN_ROOT}/r
 
 | Requirement | Template | Notes |
 |-------------|----------|-------|
-| Web apps / APIs / static sites | `apps-large` or `apps-small` | Large if multiple apps or production traffic |
+| Production apps | `apps-large` or `apps-small` | Large if multiple apps or production traffic |
+| Dev/staging builds | `dev-server` | Isolated CapRover for frequent deploys |
 | Self-hosted PostgreSQL | `db-standard` | 1 OCPU / 6 GB default, 2 OCPU / 12 GB for heavy workloads |
-| Managed Neon or Supabase | No VM needed | Frees 1 OCPU / 6 GB for apps or AI |
+| Managed Neon or Supabase | No VM needed | Frees 1 OCPU / 6 GB for other VMs |
 | OpenClaw (dedicated) | `ai-assistant` | 1 OCPU / 6 GB |
 | OpenClaw (co-located) | N/A | Installed alongside CapRover on apps VM |
 | No specific needs | `minimal` | Docker-only, configure later |
@@ -89,7 +97,8 @@ After collecting requirements, map to VM templates from `${CLAUDE_PLUGIN_ROOT}/r
 Pass the structured requirements to the `infra-planner` agent for VM allocation optimization. The requirements object should include:
 
 - `appTypes`: list of app types selected
-- `database`: self-hosted, managed, both, or none
+- `devProdSeparation`: yes or no
+- `database`: self-hosted, neon, supabase, both, or none
 - `aiAssistant`: dedicated, co-located, or none
 - `trafficLevel`: hobby, small-team, or production
 - `existingAccounts`: list of accounts already set up

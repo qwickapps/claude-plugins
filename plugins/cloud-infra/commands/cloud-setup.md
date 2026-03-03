@@ -25,7 +25,7 @@ Guided provisioning of Oracle Cloud free-tier infrastructure. Supports two modes
 ### If no argument (or argument is a description):
 
 1. Run the interactive questionnaire from the planning-infrastructure skill
-2. Collect answers for all 5 questions
+2. Collect answers for all 6 questions
 
 ## Phase 2: Generate VM Allocation
 
@@ -112,7 +112,8 @@ Each step requires user confirmation.
 **Load skill:** `cloud-infra:configuring-services`
 
 For each VM in the allocation, run the matching configuration section:
-- Apps VM: CapRover setup
+- Apps VM: CapRover setup (production)
+- Dev VM: CapRover setup (dev/staging, same steps as apps VM)
 - Database VM: PostgreSQL 16 + pgvector setup
 - AI VM: OpenClaw setup
 
@@ -122,8 +123,9 @@ Each configuration step runs via SSH and requires user confirmation.
 
 **Load skill:** `cloud-infra:setting-up-dns`
 
-Create Cloudflare DNS records for each VM:
+Create Cloudflare DNS records for each VM in the allocation:
 - `apps.$MY_DOMAIN` (proxied) + `*.apps.$MY_DOMAIN` (DNS only)
+- `dev.$MY_DOMAIN` (proxied) + `*.dev.$MY_DOMAIN` (DNS only)
 - `db.$MY_DOMAIN` (DNS only)
 - `claw.$MY_DOMAIN` (DNS only)
 
@@ -134,7 +136,8 @@ Only create records for VMs that exist in the allocation.
 **Load skill:** `cloud-infra:setting-up-free-services`
 
 Ask the user if they want to set up additional free services:
-- Supabase (managed Postgres)
+- Neon (managed Postgres, recommended)
+- Supabase (managed Postgres with auth/storage)
 - Upstash (Redis)
 - Resend (email)
 
@@ -150,9 +153,13 @@ for vm in <vm-names>; do
   ssh -o ConnectTimeout=5 $vm "echo SSH:OK" 2>/dev/null || echo "$vm SSH: FAILED"
 done
 
-# CapRover (if apps VM exists)
+# CapRover - Production (if apps VM exists)
 STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://apps.${MY_DOMAIN}:3000" 2>/dev/null)
-echo "CapRover: HTTP $STATUS"
+echo "CapRover Prod: HTTP $STATUS"
+
+# CapRover - Dev (if dev VM exists)
+STATUS=$(curl -s -o /dev/null -w "%{http_code}" "http://dev.${MY_DOMAIN}:3000" 2>/dev/null)
+echo "CapRover Dev: HTTP $STATUS"
 
 # PostgreSQL (if db VM exists)
 ssh oci-db "pg_isready -h localhost" 2>/dev/null || echo "PostgreSQL: FAILED"
@@ -168,35 +175,40 @@ Print a complete summary of the infrastructure:
 ```
 === Cloud Infrastructure Setup Complete ===
 
-VMs:
-  oci-apps  (<IP>) - CapRover PaaS
+VMs (only VMs in the allocation):
+  oci-main  (<IP>) - CapRover PaaS (production)
+  oci-dev   (<IP>) - CapRover PaaS (dev/staging)
   oci-db    (<IP>) - PostgreSQL 16 + pgvector
   oci-claw  (<IP>) - OpenClaw AI Assistant
 
 URLs:
-  CapRover Dashboard: http://apps.$MY_DOMAIN:3000
-  CapRover Default Password: captain42 (CHANGE NOW)
+  CapRover Prod: http://apps.$MY_DOMAIN:3000 (password: captain42, CHANGE NOW)
+  CapRover Dev:  http://dev.$MY_DOMAIN:3000  (password: captain42, CHANGE NOW)
   PostgreSQL: postgresql://appuser:<pwd>@<private-ip>:5432/appdb
   OpenClaw: Running (check via: ssh oci-claw "cd /opt/openclaw && docker compose logs --tail 10")
 
 DNS:
   apps.$MY_DOMAIN       -> <IP> (Cloudflare CDN)
   *.apps.$MY_DOMAIN     -> <IP> (wildcard for deployed apps)
+  dev.$MY_DOMAIN        -> <IP> (Cloudflare CDN)
+  *.dev.$MY_DOMAIN      -> <IP> (wildcard for dev apps)
   db.$MY_DOMAIN         -> <IP>
   claw.$MY_DOMAIN       -> <IP>
 
 Free Services:
+  Neon:     [configured/skipped]
   Supabase: [configured/skipped]
   Upstash:  [configured/skipped]
   Resend:   [configured/skipped]
 
 SSH Access:
-  ssh oci-apps
+  ssh oci-main
+  ssh oci-dev
   ssh oci-db
   ssh oci-claw
 
 Next Steps:
-  1. Change CapRover password at http://apps.$MY_DOMAIN:3000
+  1. Change CapRover passwords (both prod and dev dashboards)
   2. Deploy your first app: caprover deploy (or use the dashboard)
   3. Store the PostgreSQL password securely
   4. (If OpenClaw was set up) Test your Telegram bot by sending it a message
