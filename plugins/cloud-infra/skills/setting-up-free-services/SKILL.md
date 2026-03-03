@@ -19,16 +19,107 @@ Ask the user which services they need:
 
 ```
 Which free services do you want to set up?
-- Supabase (managed Postgres -- good if you skipped self-hosted DB)
+- Neon (recommended -- managed Postgres, unlimited projects, auto-suspend, branching)
+- Supabase (managed Postgres with auth, storage, edge functions)
 - Upstash (serverless Redis -- caching, sessions, rate limiting)
 - Resend (transactional email -- password resets, notifications)
 - All of the above
 - None (skip this step)
 ```
 
+## Neon Setup
+
+**When to use:** If the user chose Neon as their primary dev database. This is the recommended option for developers running multiple projects.
+
+### Instructions for the User
+
+1. Go to https://console.neon.tech
+2. Sign up with GitHub (or email)
+3. Create a project for each app (e.g., "faabzi", "qwickbrain", "trinity")
+4. For each project, select the region closest to your OCI VMs
+5. On the project dashboard, go to **Connection Details**
+
+### Collect Credentials
+
+For each project, ask the user to provide:
+- **Connection string**: The full `postgresql://...@...neon.tech/...?sslmode=require` URL
+
+Also collect the Neon API key for CLI operations (branching):
+1. Go to https://console.neon.tech/app/settings/api-keys
+2. Click "Create new API key"
+3. Save as `NEON_API_KEY`
+
+### Install Neon CLI (Optional but Recommended)
+
+The CLI enables database branching for migration testing:
+
+```bash
+# macOS
+brew install neonctl
+
+# Or via npm
+npm install -g neonctl
+
+# Authenticate
+neonctl auth
+```
+
+### Save to Environment File
+
+```bash
+cat >> ~/my-cloud-env.sh << 'EOF'
+
+# Neon
+export NEON_API_KEY="<provided-key>"
+# Per-project connection strings:
+export FAABZI_DATABASE_URL="<provided-connection-string>"
+export QWICKBRAIN_DATABASE_URL="<provided-connection-string>"
+EOF
+```
+
+Adjust the variable names and add more as the user creates projects.
+
+### Verify Connection
+
+```bash
+psql "$FAABZI_DATABASE_URL" -c "SELECT version();"
+```
+
+Expected: PostgreSQL version string (Neon runs PostgreSQL 16).
+
+### Demonstrate Branching (Optional)
+
+If the user wants to see branching in action:
+
+```bash
+# List projects
+neonctl projects list
+
+# Create a branch for testing a migration
+neonctl branches create --project-id <id> --name test-migration
+
+# Get the branch connection string
+neonctl connection-string --project-id <id> --branch test-migration
+
+# Run migrations against the branch (safe -- main DB unaffected)
+DATABASE_URL="<branch-url>" npm run migrate
+
+# If migrations succeed, apply to main. If not, delete the branch.
+neonctl branches delete --project-id <id> --branch test-migration
+```
+
+### Neon Notes
+
+- Free tier: unlimited projects, 0.5 GiB storage each, 100 compute hours/month
+- Auto-suspends after 5 min idle (cold start ~1-2s on first query)
+- Branching creates instant copy-on-write DB snapshots (no storage duplication)
+- Graduation: Neon Pro ($19/month) for 10 GiB storage, autoscaling, more compute
+
+---
+
 ## Supabase Setup
 
-**When to use:** If the user chose managed Supabase instead of (or in addition to) self-hosted PostgreSQL.
+**When to use:** If the user chose Supabase. Good for apps that need auth, file storage, or edge functions in addition to a database.
 
 ### Instructions for the User
 
@@ -209,6 +300,12 @@ After all services are configured:
 
 ```
 === Free Services Summary ===
+
+Neon:
+  Projects: [list of created projects]
+  Status: [verified/skipped]
+  CLI: neonctl [installed/not installed]
+  Note: Auto-suspends after 5 min idle, 0.5 GiB storage per project
 
 Supabase:
   URL: $SUPABASE_URL
