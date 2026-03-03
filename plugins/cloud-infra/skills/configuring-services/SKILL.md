@@ -13,7 +13,7 @@ Before running any commands on a VM, verify SSH access works. If SSH fails, stop
 
 ## App Server -- CapRover
 
-**Applies to:** VMs using `apps-large` or `apps-small` templates.
+**Applies to:** VMs using `apps-large`, `apps-small`, or `dev-server` templates.
 
 SSH into the apps VM and execute these steps in order. Present each block to the user before executing.
 
@@ -283,14 +283,29 @@ Note: This shares resources with CapRover. Monitor resource usage and consider a
 
 ---
 
+## Dev Server -- CapRover (Dev/Staging)
+
+**Applies to:** VMs using the `dev-server` template.
+
+The dev server uses the same CapRover setup as the app server. Follow all steps in the "App Server -- CapRover" section above, substituting the dev VM name (e.g., `oci-dev`) for `<vm-name>`.
+
+The dev CapRover instance operates independently from production. Deploy dev/staging builds here to isolate CPU spikes from frequent builds. Production apps remain on the apps VM.
+
+---
+
 ## Post-Configuration Summary
 
-After all VMs are configured, print:
+After all VMs are configured, print only sections matching the allocation:
 
 ```
 === Service Configuration Summary ===
 
-CapRover (<apps-vm>):
+CapRover - Production (<apps-vm>):
+  Dashboard: http://<public-ip>:3000
+  Default password: captain42 (CHANGE IMMEDIATELY)
+  Status: [docker ps output]
+
+CapRover - Dev/Staging (<dev-vm>):
   Dashboard: http://<public-ip>:3000
   Default password: captain42 (CHANGE IMMEDIATELY)
   Status: [docker ps output]
@@ -310,6 +325,6 @@ Idle Protection:
 
 Next Steps:
   1. Set up DNS records (load setting-up-dns skill)
-  2. Change CapRover default password
+  2. Change CapRover default passwords (both prod and dev)
   3. Deploy your first app via CapRover dashboard
 ```
