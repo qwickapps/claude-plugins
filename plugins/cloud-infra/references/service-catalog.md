@@ -284,6 +284,40 @@ B2_ENDPOINT=https://s3.<region>.backblazeb2.com
 
 ---
 
+## Future: Shared Secrets and Topology
+
+Currently, `qwickapps-env.sh` (secrets) and `qwickapps-topology.yml` (infrastructure state) are local files. This limits multi-dev and multi-agent workflows -- a new team member or agent on a different machine has no way to discover what infrastructure exists or access shared credentials.
+
+### Planned: OCI Vault for Secrets
+
+OCI Vault is free on Always Free tier (150 secrets, no cost for storage or API calls). Moving credentials from local env files to Vault enables:
+- New devs pull credentials with `oci vault secret get` instead of copying files
+- Agents on any machine can access shared credentials programmatically
+- Credential rotation updates Vault once; all consumers pull the update
+- `qwickapps-env.sh` becomes a local cache that sources from Vault
+
+**OCI Vault free tier:** 150 secrets, 20 master encryption key versions (HSM-backed), no cost for API calls or replication.
+
+**Cloudflare Secrets Store:** 20 secrets free (beta). More limited, oriented toward Workers runtime. Not recommended as primary secrets store.
+
+### Planned: Shared Topology File
+
+`qwickapps-topology.yml` should not be local-only. Options under consideration:
+- **Git repo** (most natural): Commit to a private infra repo. Version-controlled, diff-able, accessible to all devs/agents. IPs and OCIDs are not secrets.
+- **R2 private bucket**: Accessible via S3 API from any agent with R2 credentials.
+- **OCI Object Storage**: 20 GB free, same account as VMs.
+
+The topology file describes infrastructure structure (VMs, IPs, DNS, resource budget), not secrets. Version history is valuable for tracking when infrastructure changes were made.
+
+### Implementation Scope
+
+This is deferred to a future iteration. Current local-file approach works for solo devs. Revisit when:
+- Second team member needs infrastructure access
+- Automated agents need to discover infrastructure state independently
+- Credential rotation becomes a workflow concern
+
+---
+
 ## Environment File Template
 
 Save as `qwickapps-env.sh` (do not commit to git):
