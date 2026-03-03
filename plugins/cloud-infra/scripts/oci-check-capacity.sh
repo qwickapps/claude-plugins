@@ -12,9 +12,18 @@ set -euo pipefail
 echo "=== OCI ARM Capacity Checker ==="
 echo ""
 
-# Get tenancy and region from OCI config
-TENANCY_OCID=$(grep "tenancy" ~/.oci/config | head -1 | cut -d'=' -f2 | tr -d ' ')
-REGION=$(grep "region" ~/.oci/config | head -1 | cut -d'=' -f2 | tr -d ' ')
+# Get tenancy and region from OCI config [DEFAULT] profile
+# Scoped to [DEFAULT] section to avoid picking up values from other profiles
+TENANCY_OCID=$(sed -n '/^\[DEFAULT\]/,/^\[/p' ~/.oci/config | grep "^tenancy" | head -1 | cut -d'=' -f2 | tr -d ' ')
+REGION=$(sed -n '/^\[DEFAULT\]/,/^\[/p' ~/.oci/config | grep "^region" | head -1 | cut -d'=' -f2 | tr -d ' ')
+
+# Fallback: if [DEFAULT] section not found, try unscoped (single-profile config)
+if [ -z "$TENANCY_OCID" ]; then
+  TENANCY_OCID=$(grep "^tenancy" ~/.oci/config | head -1 | cut -d'=' -f2 | tr -d ' ')
+fi
+if [ -z "$REGION" ]; then
+  REGION=$(grep "^region" ~/.oci/config | head -1 | cut -d'=' -f2 | tr -d ' ')
+fi
 
 echo "Tenancy: $TENANCY_OCID"
 echo "Region:  $REGION"

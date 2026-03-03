@@ -59,7 +59,7 @@ else
   echo "Create it from the template in the service-catalog reference."
 fi
 ```
-If missing: Show the user the template from `${CLAUDE_PLUGIN_ROOT}/references/service-catalog.md` and ask them to fill in their values before proceeding. Get user confirmation before writing the file.
+If missing: Show the user the template from `${CLAUDE_PLUGIN_ROOT}/references/service-catalog.md` and ask them to fill in their values. **Do not write `~/my-cloud-env.sh` without explicit user confirmation.** Present the template content and ask: "Should I create this file at ~/my-cloud-env.sh with these placeholder values for you to fill in?"
 
 ### Check 1: OCI CLI
 ```bash

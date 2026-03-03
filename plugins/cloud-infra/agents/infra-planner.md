@@ -35,7 +35,7 @@ Read these reference files from `${CLAUDE_PLUGIN_ROOT}/references/`:
 Check if a pre-built split matches the requirements:
 
 - **Full Stack**: Apps + self-hosted DB + AI assistant
-- **Apps Focused**: Apps + self-hosted DB, no AI
+- **Apps Focused**: Apps + self-hosted DB + utility VM (spare capacity for custom Docker workloads, no pre-installed software)
 - **DB Focused**: Light apps + heavy DB + AI
 - **Single VM**: Everything on one machine (simplest)
 

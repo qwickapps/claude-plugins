@@ -27,6 +27,8 @@ ssh <vm-name> "sudo apt update && sudo apt upgrade -y"
 
 Do NOT use snap. Use the official Docker APT repository for ARM.
 
+The heredoc delimiter is single-quoted (`'DOCKER_INSTALL'`) so that `$(dpkg --print-architecture)` and `$(. /etc/os-release ...)` expand on the remote VM (ARM), not on your local machine (likely x86). Do not change to double quotes.
+
 ```bash
 ssh <vm-name> 'bash -s' << 'DOCKER_INSTALL'
 sudo apt-get install -y ca-certificates curl gnupg
