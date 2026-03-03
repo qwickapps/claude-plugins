@@ -23,6 +23,12 @@
       "description": "Complete software development lifecycle management. Issue-driven workflows, quality gates, agent personas, and engineering discipline skills. Replaces the superpowers plugin and the ai-sdlc-workflows Claude commands.",
       "source": "./plugins/qwickapps-sdlc",
       "category": "development"
+    },
+    {
+      "name": "cloud-infra",
+      "description": "Oracle Cloud free-tier infrastructure provisioning. Interactive planning, VM allocation, guided setup of CapRover, PostgreSQL, OpenClaw, and free SaaS services.",
+      "source": "./plugins/cloud-infra",
+      "category": "infrastructure"
     }
   ]
 }
