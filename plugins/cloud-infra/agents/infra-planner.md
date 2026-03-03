@@ -24,14 +24,29 @@ You receive structured requirements from the `planning-infrastructure` skill. Th
 
 ## Process
 
-### Step 1: Load Reference Data
+### Step 1: Check Existing Infrastructure
+
+Read `~/qwickapps-topology.yml` if it exists. This file contains the current provisioned state:
+- Which VMs already exist and their resource allocations
+- Remaining OCPU/RAM/storage budget
+- Which services are already configured
+- VCN and subnet OCIDs (avoid recreating)
+
+If the topology file exists, adjust recommendations to account for existing resources. For example:
+- If adding a VM, subtract existing allocations from the free-tier budget
+- If resizing, show current vs proposed allocation
+- If the user already has 3 VMs using all 4 OCPUs, flag that changes require destroying existing VMs
+
+If the file does not exist, this is a fresh provisioning -- proceed with full budget.
+
+### Step 2: Load Reference Data
 
 Read these reference files from `${CLAUDE_PLUGIN_ROOT}/references/`:
 
 1. `oci-free-tier-limits.md` -- Hard constraints (4 OCPU, 24 GB RAM, 200 GB storage)
 2. `vm-templates.md` -- Pre-defined VM configs and splits
 
-### Step 2: Match to Pre-Built Split
+### Step 3: Match to Pre-Built Split
 
 Check if a pre-built split matches the requirements:
 
@@ -43,7 +58,7 @@ Check if a pre-built split matches the requirements:
 
 If a pre-built split matches well, use it as the starting recommendation.
 
-### Step 3: Customize If Needed
+### Step 4: Customize If Needed
 
 Adjust the split if requirements don't fit a pre-built template:
 
@@ -63,7 +78,7 @@ Adjust the split if requirements don't fit a pre-built template:
 - Total boot storage: 200 GB
 - Minimum per VM: 1 OCPU, 1 GB RAM
 
-### Step 4: Generate Allocation Table
+### Step 5: Generate Allocation Table
 
 Present the allocation as a table:
 
@@ -76,7 +91,7 @@ Total: X OCPU / Y GB RAM / Z GB storage
 Remaining: A OCPU / B GB RAM / C GB storage
 ```
 
-### Step 5: Explain Reasoning
+### Step 6: Explain Reasoning
 
 For each VM, explain:
 - Why this OCPU/RAM allocation
@@ -84,7 +99,7 @@ For each VM, explain:
 - Which ports are needed
 - What DNS records will be created
 
-### Step 6: Flag Risks
+### Step 7: Flag Risks
 
 Identify potential issues:
 - If using all 4 OCPUs (no room for growth)

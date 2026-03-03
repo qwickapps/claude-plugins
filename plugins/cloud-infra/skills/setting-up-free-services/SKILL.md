@@ -81,8 +81,8 @@ Ask the user to provide:
 Ensure the env file has restrictive permissions (credentials in plaintext):
 
 ```bash
-touch ~/my-cloud-env.sh && chmod 600 ~/my-cloud-env.sh
-cat >> ~/my-cloud-env.sh << 'EOF'
+touch ~/qwickapps-env.sh && chmod 600 ~/qwickapps-env.sh
+cat >> ~/qwickapps-env.sh << 'EOF'
 
 # Cloudflare R2
 export R2_ACCOUNT_ID="<provided-account-id>"
@@ -148,7 +148,7 @@ Ask the user to provide:
 ### Save to Environment File
 
 ```bash
-cat >> ~/my-cloud-env.sh << 'EOF'
+cat >> ~/qwickapps-env.sh << 'EOF'
 
 # Backblaze B2
 export B2_KEY_ID="<provided-key-id>"
@@ -215,7 +215,7 @@ neonctl auth
 ### Save to Environment File
 
 ```bash
-cat >> ~/my-cloud-env.sh << 'EOF'
+cat >> ~/qwickapps-env.sh << 'EOF'
 
 # Neon
 export NEON_API_KEY="<provided-key>"
@@ -290,7 +290,7 @@ Ask the user to provide:
 
 ```bash
 # Append to the user's environment file
-cat >> ~/my-cloud-env.sh << 'EOF'
+cat >> ~/qwickapps-env.sh << 'EOF'
 
 # Supabase
 export SUPABASE_URL="<provided-url>"
@@ -344,7 +344,7 @@ Ask the user to provide:
 ### Save to Environment File
 
 ```bash
-cat >> ~/my-cloud-env.sh << 'EOF'
+cat >> ~/qwickapps-env.sh << 'EOF'
 
 # Upstash Redis
 export UPSTASH_REDIS_REST_URL="<provided-url>"
@@ -416,7 +416,7 @@ Ask the user to provide:
 ### Save to Environment File
 
 ```bash
-cat >> ~/my-cloud-env.sh << 'EOF'
+cat >> ~/qwickapps-env.sh << 'EOF'
 
 # Resend
 export RESEND_API_KEY="<provided-key>"
@@ -481,5 +481,5 @@ Resend:
   Status: [verified/skipped]
   Limits: 3,000 emails/month
 
-Environment file updated: ~/my-cloud-env.sh
+Environment file updated: ~/qwickapps-env.sh
 ```

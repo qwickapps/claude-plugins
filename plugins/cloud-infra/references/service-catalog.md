@@ -286,7 +286,7 @@ B2_ENDPOINT=https://s3.<region>.backblazeb2.com
 
 ## Environment File Template
 
-Save as `my-cloud-env.sh` (do not commit to git):
+Save as `qwickapps-env.sh` (do not commit to git):
 
 ```bash
 #!/usr/bin/env bash
