@@ -118,9 +118,9 @@ jobs:
         run: |
           ENV="${{ needs.build.outputs.environment }}"
           if [ "$ENV" = "prod" ]; then
-            echo "app_url=https://__PROD_DOMAIN__" >> "$GITHUB_OUTPUT"
+            echo "app_url=https://__APP_NAME__.app.qwickforge.com" >> "$GITHUB_OUTPUT"
           elif [ "$ENV" = "uat" ]; then
-            echo "app_url=https://__UAT_DOMAIN__" >> "$GITHUB_OUTPUT"
+            echo "app_url=https://__APP_NAME__-uat.app.qwickforge.com" >> "$GITHUB_OUTPUT"
           else
             SHORT_SHA=$(echo "$GITHUB_SHA" | head -c 7)
             echo "app_url=https://__APP_NAME__-${SHORT_SHA}.dev.qwickforge.com" >> "$GITHUB_OUTPUT"
