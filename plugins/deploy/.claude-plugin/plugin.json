@@ -1,0 +1,18 @@
+{
+  "name": "deploy",
+  "version": "1.0.0",
+  "description": "Deployment workflow generator for CapRover apps with QwickWay gateway. Provides /setup_workflow to generate correct GitHub Actions workflows, battle-tested deployment scripts, and troubleshooting guidance. Fixes common deployment pitfalls: wrong API endpoints, silent health check failures, missing gateway provisioning.",
+  "author": {
+    "name": "QwickApps",
+    "email": "support@qwickapps.com"
+  },
+  "keywords": [
+    "deploy",
+    "caprover",
+    "qwickway",
+    "github-actions",
+    "ghcr",
+    "docker",
+    "ci-cd"
+  ]
+}
