@@ -222,6 +222,32 @@ else
   fi
 fi
 
+# Enable HTTPS on the base CapRover domain (required before forceSsl can be set)
+if [ "$ENABLE_SSL" = "true" ]; then
+  echo ""
+  echo "Enabling HTTPS on base domain..."
+  SSL_RESPONSE=$(caprover_api_call "Enable base domain SSL" \
+    curl -s -k -X POST "$CAPROVER_URL/api/v2/user/apps/appDefinitions/enablebasedomainssl" \
+    -H "Content-Type: application/json" \
+    -H "x-captain-auth: $TOKEN" \
+    -d "$(jq -n --arg app "$APP_NAME" '{appName: $app}')")
+
+  SSL_STATUS=$(echo "$SSL_RESPONSE" | jq -r '.status')
+  if [ "$SSL_STATUS" = "100" ]; then
+    echo "  HTTPS enabled on base domain"
+  else
+    SSL_DESC=$(echo "$SSL_RESPONSE" | jq -r '.description // "Unknown error"')
+    # "already enabled" is not an error
+    if echo "$SSL_DESC" | grep -iq "already"; then
+      echo "  HTTPS already enabled on base domain"
+    else
+      echo "  Warning: Could not enable HTTPS: $SSL_DESC"
+      echo "  Continuing without forceSsl..."
+      FORCE_SSL="false"
+    fi
+  fi
+fi
+
 # Fetch current app definition (read-then-write: preserves all existing fields)
 echo ""
 echo "Fetching current app definition..."
@@ -312,7 +338,9 @@ UPDATE_STATUS=$(echo "$UPDATE_RESPONSE" | jq -r '.status')
 if [ "$UPDATE_STATUS" = "100" ] || [ "$UPDATE_STATUS" = "1000" ]; then
   echo "  App settings updated"
 else
-  echo "  Warning: Update response: $(echo "$UPDATE_RESPONSE" | jq -r '.description')"
+  UPDATE_DESC=$(echo "$UPDATE_RESPONSE" | jq -r '.description // "Unknown error"')
+  echo "  Error: Failed to update app settings: $UPDATE_DESC (status: $UPDATE_STATUS)"
+  exit 1
 fi
 
 # Configure domains and SSL (only for new apps - existing apps keep their domain config)
