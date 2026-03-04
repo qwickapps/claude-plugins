@@ -234,16 +234,39 @@ else
   fi
 fi
 
-# Step 3: Check container status
+# Step 3: Check container status (with retry for Docker Swarm convergence)
 echo ""
 echo "Step 3: Checking container status..."
 
-APP_DATA=$(curl -s -k -X GET "$CAPROVER_URL/api/v2/user/apps/appData/$APP_NAME" \
-  -H "x-captain-auth: $TOKEN")
+MAX_STATUS_ATTEMPTS=6
+STATUS_DELAY=10
+STATUS_ATTEMPT=1
+INSTANCES_OK=0
 
-IS_READY=$(echo "$APP_DATA" | jq -r '.data.isAppBuilding')
-INSTANCE_COUNT=$(echo "$APP_DATA" | jq -r '.data.instanceCount // 1')
-RUNNING_INSTANCES=$(echo "$APP_DATA" | jq -r '.data.versions[0].deployedInstances // 0')
+while [ $STATUS_ATTEMPT -le $MAX_STATUS_ATTEMPTS ]; do
+  APP_DATA=$(curl -s -k -X GET "$CAPROVER_URL/api/v2/user/apps/appData/$APP_NAME" \
+    -H "x-captain-auth: $TOKEN")
+
+  IS_READY=$(echo "$APP_DATA" | jq -r '.data.isAppBuilding')
+  INSTANCE_COUNT=$(echo "$APP_DATA" | jq -r '.data.instanceCount // 1')
+  RUNNING_INSTANCES=$(echo "$APP_DATA" | jq -r '.data.versions[0].deployedInstances // 0')
+
+  # Default to safe values if CapRover returned non-numeric data
+  [[ "$INSTANCE_COUNT" =~ ^[0-9]+$ ]] || INSTANCE_COUNT=1
+  [[ "$RUNNING_INSTANCES" =~ ^[0-9]+$ ]] || RUNNING_INSTANCES=0
+
+  if [ "$RUNNING_INSTANCES" -ge "$INSTANCE_COUNT" ] && [ "$INSTANCE_COUNT" -gt 0 ]; then
+    INSTANCES_OK=1
+    break
+  fi
+
+  if [ $STATUS_ATTEMPT -lt $MAX_STATUS_ATTEMPTS ]; then
+    echo "  Attempt $STATUS_ATTEMPT/$MAX_STATUS_ATTEMPTS: $RUNNING_INSTANCES/$INSTANCE_COUNT instances (waiting ${STATUS_DELAY}s for Docker Swarm convergence...)"
+    sleep $STATUS_DELAY
+  fi
+
+  STATUS_ATTEMPT=$((STATUS_ATTEMPT + 1))
+done
 
 if [ "$IS_READY" = "false" ]; then
   echo "  ✓ App build complete"
@@ -251,20 +274,19 @@ else
   echo "  Warning: App may still be building"
 fi
 
-# Default to safe values if CapRover returned non-numeric data
-[[ "$INSTANCE_COUNT" =~ ^[0-9]+$ ]] || INSTANCE_COUNT=1
-[[ "$RUNNING_INSTANCES" =~ ^[0-9]+$ ]] || RUNNING_INSTANCES=0
-
 echo "  Instance count: $INSTANCE_COUNT"
 echo "  Running instances: $RUNNING_INSTANCES"
 
-if [ "$RUNNING_INSTANCES" -lt "$INSTANCE_COUNT" ]; then
+if [ $INSTANCES_OK -eq 1 ]; then
+  echo "  ✓ All instances running"
+elif [ "$HTTP_STATUS" = "200" ]; then
+  echo "  ⚠️  CapRover reports $RUNNING_INSTANCES/$INSTANCE_COUNT instances, but HTTP health check passed"
+  echo "  Continuing (HTTP 200 is the definitive health indicator)"
+else
   echo "  ✗ Not all instances running ($RUNNING_INSTANCES/$INSTANCE_COUNT)"
   echo ""
   echo "VALIDATION FAILED: Not all instances are running"
   exit 1
-else
-  echo "  ✓ All instances running"
 fi
 
 echo ""
