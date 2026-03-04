@@ -160,12 +160,20 @@ echo "========================================="
 # Authenticate with dev CapRover
 echo ""
 echo "Authenticating with dev CapRover..."
+set +e
 LOGIN_RESPONSE=$(curl -s -k -X POST "$CAPROVER_URL/api/v2/login" \
   -H "Content-Type: application/json" \
   -d "$(jq -n --arg pw "$CAPROVER_PASSWORD" '{password: $pw}')")
+CURL_EXIT=$?
+set -e
 
-if ! echo "$LOGIN_RESPONSE" | jq -e . >/dev/null 2>&1; then
-  echo "Error: Dev CapRover returned non-JSON response (server may be down)"
+if [ $CURL_EXIT -ne 0 ]; then
+  echo "Error: curl failed (exit $CURL_EXIT). Dev CapRover may be unreachable (URL: $CAPROVER_URL)"
+  exit 1
+fi
+
+if [ -z "$LOGIN_RESPONSE" ] || ! echo "$LOGIN_RESPONSE" | jq -e . >/dev/null 2>&1; then
+  echo "Error: Dev CapRover returned non-JSON response (URL: $CAPROVER_URL)"
   exit 1
 fi
 
@@ -329,12 +337,20 @@ echo "========================================="
 # Authenticate with route CapRover
 echo ""
 echo "Authenticating with route CapRover..."
+set +e
 ROUTE_LOGIN_RESPONSE=$(curl -s -k -X POST "$ROUTE_CAPROVER_URL/api/v2/login" \
   -H "Content-Type: application/json" \
   -d "$(jq -n --arg pw "$ROUTE_CAPROVER_PASSWORD" '{password: $pw}')")
+CURL_EXIT=$?
+set -e
 
-if ! echo "$ROUTE_LOGIN_RESPONSE" | jq -e . >/dev/null 2>&1; then
-  echo "Error: Route CapRover returned non-JSON response (server may be down)"
+if [ $CURL_EXIT -ne 0 ]; then
+  echo "Error: curl failed (exit $CURL_EXIT). Route CapRover may be unreachable (URL: $ROUTE_CAPROVER_URL)"
+  exit 1
+fi
+
+if [ -z "$ROUTE_LOGIN_RESPONSE" ] || ! echo "$ROUTE_LOGIN_RESPONSE" | jq -e . >/dev/null 2>&1; then
+  echo "Error: Route CapRover returned non-JSON response (URL: $ROUTE_CAPROVER_URL)"
   exit 1
 fi
 

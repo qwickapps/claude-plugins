@@ -157,12 +157,20 @@ echo "========================================="
 # Authenticate with CapRover
 echo ""
 echo "Authenticating with CapRover..."
+set +e
 LOGIN_RESPONSE=$(curl -s -k -X POST "$CAPROVER_URL/api/v2/login" \
   -H "Content-Type: application/json" \
   -d "$(jq -n --arg pw "$CAPROVER_PASSWORD" '{password: $pw}')")
+CURL_EXIT=$?
+set -e
 
-if ! echo "$LOGIN_RESPONSE" | jq -e . >/dev/null 2>&1; then
-  echo "Error: CapRover returned non-JSON response (server may be down)"
+if [ $CURL_EXIT -ne 0 ]; then
+  echo "Error: curl failed (exit $CURL_EXIT). CapRover may be unreachable (URL: $CAPROVER_URL)"
+  exit 1
+fi
+
+if [ -z "$LOGIN_RESPONSE" ] || ! echo "$LOGIN_RESPONSE" | jq -e . >/dev/null 2>&1; then
+  echo "Error: CapRover returned non-JSON response (URL: $CAPROVER_URL)"
   exit 1
 fi
 
