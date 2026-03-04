@@ -150,13 +150,13 @@ jobs:
           APP_URL="${{ needs.build.outputs.app_url }}"
           ENVIRONMENT="${{ needs.build.outputs.environment }}"
 
-          cat > /tmp/app-env.txt << EOF
-NODE_ENV=production
-APP_ENV=${ENVIRONMENT}
-APP_NAME=${APP_NAME}
-NEXT_PUBLIC_SERVER_URL=${APP_URL}
-PAYLOAD_SECRET=${PAYLOAD_SECRET}
-EOF
+          printf '%s\n' \
+            "NODE_ENV=production" \
+            "APP_ENV=${ENVIRONMENT}" \
+            "APP_NAME=${APP_NAME}" \
+            "NEXT_PUBLIC_SERVER_URL=${APP_URL}" \
+            "PAYLOAD_SECRET=${PAYLOAD_SECRET}" \
+            > /tmp/app-env.txt
 
           .github/scripts/configure-caprover-app.sh \
             --app-name "${APP_NAME}" \

@@ -127,10 +127,10 @@ jobs:
 
       - name: Write env file
         run: |
-          cat > /tmp/app.env <<'EOF'
-NODE_ENV=production
-PORT=__CONTAINER_PORT__
-EOF
+          printf '%s\n' \
+            'NODE_ENV=production' \
+            'PORT=__CONTAINER_PORT__' \
+            > /tmp/app.env
 
       - name: Configure CapRover app
         env:
