@@ -92,11 +92,31 @@ fi
 
 echo "  ✓ Authenticated"
 
-# Step 1: Check HTTP status and version
+# Step 1: Check HTTP status and version (with retry for container startup)
 echo ""
 echo "Step 1: Checking HTTP status and version..."
+
+MAX_HEALTH_ATTEMPTS=10
+HEALTH_DELAY=10
+HEALTH_ATTEMPT=1
+HTTP_STATUS="000"
+
+while [ $HEALTH_ATTEMPT -le $MAX_HEALTH_ATTEMPTS ]; do
+  HTTP_STATUS=$(curl -s -k -o /dev/null -w "%{http_code}" "$APP_URL$HEALTH_PATH" || echo "000")
+
+  if [ "$HTTP_STATUS" = "200" ]; then
+    break
+  fi
+
+  if [ $HEALTH_ATTEMPT -lt $MAX_HEALTH_ATTEMPTS ]; then
+    echo "  Attempt $HEALTH_ATTEMPT/$MAX_HEALTH_ATTEMPTS: HTTP $HTTP_STATUS (waiting ${HEALTH_DELAY}s for container startup...)"
+    sleep $HEALTH_DELAY
+  fi
+
+  HEALTH_ATTEMPT=$((HEALTH_ATTEMPT + 1))
+done
+
 HEALTH_RESPONSE=$(curl -s -k "$APP_URL$HEALTH_PATH")
-HTTP_STATUS=$(curl -s -k -o /dev/null -w "%{http_code}" "$APP_URL$HEALTH_PATH" || echo "000")
 
 if [ "$HTTP_STATUS" = "200" ]; then
   echo "  ✓ HTTP 200 OK"
