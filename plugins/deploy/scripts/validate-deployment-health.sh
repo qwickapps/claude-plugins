@@ -71,12 +71,22 @@ echo "========================================="
 # Authenticate with CapRover
 echo ""
 echo "Authenticating with CapRover..."
-TOKEN=$(curl -s -k -X POST "$CAPROVER_URL/api/v2/login" \
+set +e
+LOGIN_RESPONSE=$(curl -s -k -X POST "$CAPROVER_URL/api/v2/login" \
   -H "Content-Type: application/json" \
-  -d "{\"password\":\"$CAPROVER_PASSWORD\"}" | jq -r '.data.token')
+  -d "$(jq -n --arg pw "$CAPROVER_PASSWORD" '{password: $pw}')")
+CURL_EXIT=$?
+set -e
+
+if [ $CURL_EXIT -ne 0 ]; then
+  echo "Error: curl failed (exit $CURL_EXIT). CapRover may be unreachable (URL: $CAPROVER_URL)"
+  exit 1
+fi
+
+TOKEN=$(echo "$LOGIN_RESPONSE" | jq -r '.data.token' 2>/dev/null)
 
 if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
-  echo "Error: Failed to authenticate"
+  echo "Error: Failed to authenticate with CapRover (URL: $CAPROVER_URL)"
   exit 1
 fi
 
@@ -85,8 +95,8 @@ echo "  ✓ Authenticated"
 # Step 1: Check HTTP status and version
 echo ""
 echo "Step 1: Checking HTTP status and version..."
-HEALTH_RESPONSE=$(curl -s "$APP_URL$HEALTH_PATH")
-HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$APP_URL$HEALTH_PATH" || echo "000")
+HEALTH_RESPONSE=$(curl -s -k "$APP_URL$HEALTH_PATH")
+HTTP_STATUS=$(curl -s -k -o /dev/null -w "%{http_code}" "$APP_URL$HEALTH_PATH" || echo "000")
 
 if [ "$HTTP_STATUS" = "200" ]; then
   echo "  ✓ HTTP 200 OK"
