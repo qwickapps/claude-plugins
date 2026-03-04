@@ -1,0 +1,237 @@
+name: Deploy __APP_NAME__
+
+on:
+  push:
+    branches: [main, dev]
+    tags: ['v*']
+    paths-ignore:
+      - '*.md'
+      - '.claude/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - dev
+          - uat
+          - prod
+        default: dev
+
+concurrency:
+  group: deploy-__APP_NAME__-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  REGISTRY: ghcr.io
+  OWNER: __GITHUB_OWNER__
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image_ref: ${{ steps.meta.outputs.image_ref }}
+      environment: ${{ steps.env.outputs.environment }}
+      app_name: ${{ steps.meta.outputs.app_name }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Determine environment
+        id: env
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "environment=${{ inputs.environment }}" >> "$GITHUB_OUTPUT"
+          elif echo "${{ github.ref }}" | grep -q '^refs/tags/v'; then
+            echo "environment=prod" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "environment=uat" >> "$GITHUB_OUTPUT"
+          else
+            echo "environment=dev" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate image tag
+        id: meta
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          TAG="${VERSION}.${{ github.run_number }}"
+          ENV="${{ steps.env.outputs.environment }}"
+          IMAGE="${{ env.REGISTRY }}/${{ env.OWNER }}/__APP_NAME__-${ENV}:${TAG}"
+
+          # Derive app_name for CapRover
+          if [ "$ENV" = "prod" ]; then
+            APP_NAME="__APP_NAME__"
+          elif [ "$ENV" = "uat" ]; then
+            APP_NAME="__APP_NAME__-uat"
+          else
+            SHORT_SHA=$(echo "$GITHUB_SHA" | head -c 7)
+            APP_NAME="__APP_NAME__-${SHORT_SHA}"
+          fi
+
+          echo "image_ref=${IMAGE}" >> "$GITHUB_OUTPUT"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "app_name=${APP_NAME}" >> "$GITHUB_OUTPUT"
+          echo "Image: ${IMAGE}"
+          echo "App: ${APP_NAME}"
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.image_ref }}
+            ${{ env.REGISTRY }}/${{ env.OWNER }}/__APP_NAME__-${{ steps.env.outputs.environment }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy-app:
+    needs: build
+    runs-on: ubuntu-latest
+    concurrency:
+      group: caprover-deploy
+      cancel-in-progress: false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Make scripts executable
+        run: chmod +x .github/scripts/*.sh
+
+      - name: Derive app URL
+        id: vars
+        run: |
+          ENV="${{ needs.build.outputs.environment }}"
+          if [ "$ENV" = "prod" ]; then
+            echo "app_url=https://__PROD_DOMAIN__" >> "$GITHUB_OUTPUT"
+          elif [ "$ENV" = "uat" ]; then
+            echo "app_url=https://__UAT_DOMAIN__" >> "$GITHUB_OUTPUT"
+          else
+            SHORT_SHA=$(echo "$GITHUB_SHA" | head -c 7)
+            echo "app_url=https://__APP_NAME__-${SHORT_SHA}.dev.qwickforge.com" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Write env file
+        run: |
+          cat > /tmp/app.env <<'EOF'
+NODE_ENV=production
+PORT=__CONTAINER_PORT__
+EOF
+
+      - name: Configure CapRover app
+        env:
+          CAPROVER_URL: ${{ needs.build.outputs.environment == 'dev' && secrets.OCI_DEV_CAPROVER_URL || secrets.CAPROVER_URL }}
+          CAPROVER_PASSWORD: ${{ needs.build.outputs.environment == 'dev' && secrets.OCI_DEV_CAPROVER_PASSWORD || secrets.CAPROVER_PASSWORD }}
+        run: |
+          .github/scripts/configure-caprover-app.sh \
+            --app-name "${{ needs.build.outputs.app_name }}" \
+            --caprover-url "$CAPROVER_URL" \
+            --caprover-password "$CAPROVER_PASSWORD" \
+            --container-port __CONTAINER_PORT__ \
+            --env-file /tmp/app.env
+
+      - name: Deploy from GHCR
+        env:
+          CAPROVER_URL: ${{ needs.build.outputs.environment == 'dev' && secrets.OCI_DEV_CAPROVER_URL || secrets.CAPROVER_URL }}
+          CAPROVER_PASSWORD: ${{ needs.build.outputs.environment == 'dev' && secrets.OCI_DEV_CAPROVER_PASSWORD || secrets.CAPROVER_PASSWORD }}
+        run: |
+          .github/scripts/deploy-from-ghcr.sh \
+            --app-name "${{ needs.build.outputs.app_name }}" \
+            --image-ref "${{ needs.build.outputs.image_ref }}" \
+            --caprover-url "$CAPROVER_URL" \
+            --caprover-password "$CAPROVER_PASSWORD" \
+            --github-token "${{ secrets.GHCR_PULL_TOKEN }}" \
+            --github-owner "${{ env.OWNER }}"
+
+      - name: Validate deployment health
+        env:
+          CAPROVER_URL: ${{ needs.build.outputs.environment == 'dev' && secrets.OCI_DEV_CAPROVER_URL || secrets.CAPROVER_URL }}
+          CAPROVER_PASSWORD: ${{ needs.build.outputs.environment == 'dev' && secrets.OCI_DEV_CAPROVER_PASSWORD || secrets.CAPROVER_PASSWORD }}
+        run: |
+          .github/scripts/validate-deployment-health.sh \
+            --app-name "${{ needs.build.outputs.app_name }}" \
+            --caprover-url "$CAPROVER_URL" \
+            --caprover-password "$CAPROVER_PASSWORD" \
+            --app-url "${{ steps.vars.outputs.app_url }}" \
+            --health-path "__HEALTH_PATH__"
+
+  deploy-gateway:
+    needs: [build, deploy-app]
+    runs-on: ubuntu-latest
+    concurrency:
+      group: caprover-deploy
+      cancel-in-progress: false
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Make scripts executable
+        run: chmod +x .github/scripts/*.sh
+
+      - name: Set gateway variables
+        id: gateway
+        run: |
+          ENV="${{ needs.build.outputs.environment }}"
+          SHORT_SHA=$(echo "$GITHUB_SHA" | head -c 7)
+
+          # Gateway app name: dev always uses a stable name so the route
+          # points to the latest dev build rather than per-commit names.
+          if [ "$ENV" = "prod" ]; then
+            GATEWAY_APP_NAME="__APP_NAME__"
+            TARGET_APP="${{ needs.build.outputs.app_name }}.app.qwickforge.com"
+          elif [ "$ENV" = "uat" ]; then
+            GATEWAY_APP_NAME="__APP_NAME__-uat"
+            TARGET_APP="${{ needs.build.outputs.app_name }}.app.qwickforge.com"
+          else
+            GATEWAY_APP_NAME="__APP_NAME__-dev"
+            TARGET_APP="__APP_NAME__-${SHORT_SHA}.dev.qwickforge.com"
+          fi
+
+          echo "gateway_app_name=${GATEWAY_APP_NAME}" >> "$GITHUB_OUTPUT"
+          echo "target_app_url=https://${TARGET_APP}" >> "$GITHUB_OUTPUT"
+
+      - name: Provision QwickWay route
+        run: |
+          .github/scripts/setup-qwickway-route.sh \
+            --gateway-app-name "${{ steps.gateway.outputs.gateway_app_name }}" \
+            --target-app-url "${{ steps.gateway.outputs.target_app_url }}" \
+            --route-caprover-url "${{ secrets.ROUTE_CAPROVER_URL }}" \
+            --route-caprover-password "${{ secrets.ROUTE_CAPROVER_PASSWORD }}" \
+            --health-check-path "__HEALTH_PATH__" \
+            --github-token "${{ secrets.GHCR_PULL_TOKEN }}" \
+            --github-owner "__GITHUB_OWNER__"
+
+  cleanup-dev:
+    needs: [build, deploy-gateway]
+    runs-on: ubuntu-latest
+    if: needs.build.outputs.environment == 'dev'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Make scripts executable
+        run: chmod +x .github/scripts/*.sh
+
+      - name: Clean up old dev builds
+        run: |
+          .github/scripts/cleanup-dev-builds.sh \
+            --app-name-prefix "__APP_NAME__" \
+            --caprover-url "${{ secrets.OCI_DEV_CAPROVER_URL }}" \
+            --caprover-password "${{ secrets.OCI_DEV_CAPROVER_PASSWORD }}" \
+            --route-caprover-url "${{ secrets.ROUTE_CAPROVER_URL }}" \
+            --route-caprover-password "${{ secrets.ROUTE_CAPROVER_PASSWORD }}" \
+            --gateway-app-name "__APP_NAME__-dev"

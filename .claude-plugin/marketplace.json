@@ -23,6 +23,12 @@
       "description": "Complete software development lifecycle management. Issue-driven workflows, quality gates, agent personas, and engineering discipline skills. Replaces the superpowers plugin and the ai-sdlc-workflows Claude commands.",
       "source": "./plugins/qwickapps-sdlc",
       "category": "development"
+    },
+    {
+      "name": "deploy",
+      "description": "Deployment workflow generator for CapRover apps with QwickWay gateway. Generates GitHub Actions workflows, provides battle-tested deployment scripts, and troubleshooting guidance.",
+      "source": "./plugins/deploy",
+      "category": "devops"
     }
   ]
 }
