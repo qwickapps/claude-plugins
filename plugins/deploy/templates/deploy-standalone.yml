@@ -93,6 +93,7 @@ jobs:
         with:
           context: .
           push: true
+          platforms: linux/amd64,linux/arm64
           tags: |
             ${{ steps.meta.outputs.image_ref }}
             ${{ env.REGISTRY }}/${{ env.OWNER }}/__APP_NAME__-${{ steps.env.outputs.environment }}:latest
