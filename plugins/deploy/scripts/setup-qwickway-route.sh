@@ -416,7 +416,7 @@ else
 fi
 
 GATEWAY_HEALTH_URL="$GATEWAY_BASE_URL/gateway/health"
-MAX_WAIT=60
+MAX_WAIT=90
 WAIT_INTERVAL=5
 ELAPSED=0
 HEALTH_OK=false
@@ -425,9 +425,11 @@ echo "  Health URL: $GATEWAY_HEALTH_URL"
 echo "  Waiting up to ${MAX_WAIT}s for container to start..."
 
 while [ $ELAPSED -lt $MAX_WAIT ]; do
-  HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$GATEWAY_HEALTH_URL" 2>/dev/null || echo "000")
+  # Follow redirects (-L) and accept any 2xx or 3xx as healthy.
+  # QwickWay may redirect /gateway/health depending on its configuration.
+  HTTP_STATUS=$(curl -s -L -o /dev/null -w "%{http_code}" --max-time 10 "$GATEWAY_HEALTH_URL" 2>/dev/null || echo "000")
 
-  if [ "$HTTP_STATUS" = "200" ]; then
+  if [[ "$HTTP_STATUS" =~ ^[23] ]]; then
     HEALTH_OK=true
     break
   fi
@@ -438,11 +440,11 @@ while [ $ELAPSED -lt $MAX_WAIT ]; do
 done
 
 if [ "$HEALTH_OK" = "true" ]; then
-  echo "  Gateway health check passed (HTTP 200)"
+  echo "  Gateway health check passed (HTTP $HTTP_STATUS)"
 else
-  echo "  Warning: Gateway health check did not return 200 within ${MAX_WAIT}s"
+  echo "  Warning: Gateway health check did not return 2xx/3xx within ${MAX_WAIT}s"
   echo "  Last HTTP status: $HTTP_STATUS"
-  echo "  The container may still be starting. Verify manually: curl $GATEWAY_HEALTH_URL"
+  echo "  The container may still be starting. Verify manually: curl -L $GATEWAY_HEALTH_URL"
   exit 1
 fi
 
