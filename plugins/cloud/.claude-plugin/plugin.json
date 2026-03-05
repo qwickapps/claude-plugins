@@ -1,5 +1,5 @@
 {
-  "name": "cloud-infra",
+  "name": "cloud",
   "version": "1.0.0",
   "description": "Oracle Cloud free-tier infrastructure provisioning. Interactive planning, VM allocation, guided setup of CapRover, PostgreSQL, OpenClaw, and free SaaS services.",
   "author": {
