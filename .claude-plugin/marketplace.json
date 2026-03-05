@@ -7,21 +7,21 @@
   },
   "plugins": [
     {
-      "name": "qwickapps-ux-design",
+      "name": "ux-design",
       "description": "QwickApps UX design system enforcement. Replaces frontend-design with framework-aware version. Enforces @qwickapps/react-framework components and --theme-* CSS variables.",
-      "source": "./plugins/qwickapps-ux-design",
+      "source": "./plugins/ux-design",
       "category": "development"
     },
     {
-      "name": "qwickapps-dev-guide",
+      "name": "dev-guide",
       "description": "QwickApps developer guidance skills. Start with use-stack to configure tech stack, then reference qwickapps-cms, qwickapps-server, and qwickapps-react-framework for per-package patterns.",
-      "source": "./plugins/qwickapps-dev-guide",
+      "source": "./plugins/dev-guide",
       "category": "development"
     },
     {
-      "name": "qwickapps-sdlc",
+      "name": "sdlc",
       "description": "Complete software development lifecycle management. Issue-driven workflows, quality gates, agent personas, and engineering discipline skills. Replaces the superpowers plugin and the ai-sdlc-workflows Claude commands.",
-      "source": "./plugins/qwickapps-sdlc",
+      "source": "./plugins/sdlc",
       "category": "development"
     },
     {
