@@ -25,6 +25,12 @@
       "category": "development"
     },
     {
+      "name": "cloud",
+      "description": "Oracle Cloud free-tier infrastructure provisioning. Interactive planning, VM allocation, guided setup of CapRover, PostgreSQL, OpenClaw, and free SaaS services.",
+      "source": "./plugins/cloud",
+      "category": "devops"
+    },
+    {
       "name": "deploy",
       "description": "Deployment workflow generator for CapRover apps with QwickWay gateway. Generates GitHub Actions workflows, provides battle-tested deployment scripts, and troubleshooting guidance.",
       "source": "./plugins/deploy",
