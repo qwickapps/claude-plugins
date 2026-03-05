@@ -1,6 +1,6 @@
 ---
 name: secrets
-description: Manage encrypted environment variables. Subcommands: list, resolve, local, github, caprover, diff, worktree, validate.
+description: Manage encrypted environment variables. Subcommands: list, resolve, local, github, github-infra, caprover, diff, worktree, validate.
 ---
 
 The /secrets command manages encrypted environment variables stored in `environments.yml` (SOPS+age encrypted).
@@ -17,7 +17,8 @@ Subcommands:
 - `list` - List all projects and environments
 - `resolve` - Output merged KEY=VALUE pairs (requires --project, --env)
 - `local` - Generate .env files for local dev (requires --project, --env)
-- `github` - Push secrets to GitHub Actions (requires --project, --env)
+- `github` - Push project secrets to GitHub Actions as <PROJECT>_<ENV>_<KEY> (requires --project, --env)
+- `github-infra` - Push infrastructure secrets (CapRover URLs, global tokens) to GitHub Actions
 - `caprover` - Generate CapRover env file (requires --project, --env)
 - `diff` - Compare resolved vs current targets (requires --project)
 - `worktree` - Generate .env files for a worktree (requires --project)
@@ -34,6 +35,8 @@ Map common natural language to subcommands:
 - "generate env for faabzi dev" -> `local --project faabzi --env dev`
 - "push faabzi prod to github" -> `github --project faabzi --env prod`
 - "what's different for faabzi" -> `diff --project faabzi`
+- "push infra secrets to github" -> `github-infra`
+- "push caprover urls to github" -> `github-infra`
 
 ### Step 2: Build and run the command
 
@@ -54,8 +57,11 @@ bash "${CLAUDE_PLUGIN_ROOT}/scripts/sync-env.sh" resolve --project faabzi --env 
 # Generate local .env
 bash "${CLAUDE_PLUGIN_ROOT}/scripts/sync-env.sh" local --project faabzi --env dev --output ./clients/faabzi/client/.env.local
 
-# Dry run github sync
+# Dry run github sync (creates FAABZI_PROD_<KEY> secrets)
 bash "${CLAUDE_PLUGIN_ROOT}/scripts/sync-env.sh" github --project faabzi --env prod --dry-run
+
+# Push infrastructure secrets (CapRover URLs, global tokens)
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/sync-env.sh" github-infra --dry-run
 
 # Worktree env generation
 bash "${CLAUDE_PLUGIN_ROOT}/scripts/sync-env.sh" worktree --project faabzi --output .

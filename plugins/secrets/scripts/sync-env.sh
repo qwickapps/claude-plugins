@@ -71,7 +71,7 @@ usage() {
 # Parse arguments
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    validate|resolve|local|github|caprover|diff|worktree|list)
+    validate|resolve|local|github|github-infra|caprover|diff|worktree|list)
       COMMAND="$1"; shift ;;
     --project|-p)
       PROJECT="$2"; shift 2 ;;
@@ -148,6 +148,11 @@ case "$COMMAND" in
     [[ -z "$PROJECT" ]] && { echo -e "${RED}Error: --project required${NC}"; exit 1; }
     [[ -z "$ENV" ]] && { echo -e "${RED}Error: --env required${NC}"; exit 1; }
     do_github "$PROJECT" "$ENV"
+    ;;
+  github-infra)
+    source "$LIB_DIR/resolve.sh"
+    source "$LIB_DIR/github.sh"
+    do_github_infra
     ;;
   caprover)
     source "$LIB_DIR/resolve.sh"
