@@ -29,6 +29,12 @@
       "description": "Deployment workflow generator for CapRover apps with QwickWay gateway. Generates GitHub Actions workflows, provides battle-tested deployment scripts, and troubleshooting guidance.",
       "source": "./plugins/deploy",
       "category": "devops"
+    },
+    {
+      "name": "secrets",
+      "description": "Encrypted environment variable management with SOPS+age. Resolve, generate, and sync env vars across local dev, GitHub Actions, and CapRover from a single encrypted environments.yml.",
+      "source": "./plugins/secrets",
+      "category": "devops"
     }
   ]
 }
