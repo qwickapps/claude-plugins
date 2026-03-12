@@ -31,7 +31,7 @@ env:
 jobs:
   # ─── Phase 0: Compute environment, names, and URLs ───
   prepare:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       environment: ${{ steps.env.outputs.environment }}
       app_name: ${{ steps.meta.outputs.app_name }}
@@ -107,7 +107,7 @@ jobs:
 
   build:
     needs: prepare
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: read
       packages: write
@@ -139,7 +139,7 @@ jobs:
 
   provision-app:
     needs: prepare
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     concurrency:
       group: caprover-deploy-app
       cancel-in-progress: false
@@ -171,7 +171,7 @@ jobs:
 
   provision-gateway:
     needs: prepare
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     concurrency:
       group: caprover-deploy-gateway
       cancel-in-progress: false
@@ -197,7 +197,7 @@ jobs:
 
   deploy-and-verify:
     needs: [prepare, build, provision-app, provision-gateway]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     concurrency:
       group: caprover-deploy-app
       cancel-in-progress: false
@@ -237,7 +237,7 @@ jobs:
 
   cleanup-dev:
     needs: [prepare, deploy-and-verify]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     if: needs.prepare.outputs.environment == 'dev'
     steps:
       - name: Checkout code
