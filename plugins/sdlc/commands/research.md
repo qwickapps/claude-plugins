@@ -1,6 +1,6 @@
 ---
 name: research
-description: Deep technical investigation. Creates a research issue, uses multiple investigation methods, documents findings with evidence, and saves to QwickBrain as a spike document.
+description: Deep technical investigation. Creates a research issue, uses multiple investigation methods, documents findings with evidence, and saves findings as a spike document to the team knowledge base.
 ---
 
 The /research command is for structured investigation when understanding is needed before decisions can be made. Prioritize depth over speed.
@@ -50,11 +50,12 @@ Use all available tools systematically. Work through the investigation methods h
 - Use WebFetch to retrieve official documentation and API references
 - Check release announcements for breaking changes and migration guides
 
-**Level 5: QwickBrain knowledge base**
-- Use `mcp__qwickbrain__search_documents` to find past decisions and ADRs related to the question
-- Use `mcp__qwickbrain__get_document` to retrieve specific documents by name and type
-- Use `mcp__qwickbrain__list_documents` to browse by type (adr, spike, design, frd)
+**Level 5: Team knowledge base**
+- Use `KB_SEARCH_DOCUMENTS` to find past decisions and ADRs related to the question
+- Use `KB_GET_DOCUMENT` to retrieve specific documents by name and type
+- Use `KB_LIST_DOCUMENTS` to browse by type (adr, spike, design, frd)
 - Do not reinvent solutions that have already been decided
+- If no SOP plugin is configured, skip this level.
 
 **Level 6: Community sources**
 - Use WebSearch for community knowledge, Stack Overflow answers, and blog posts
@@ -111,16 +112,14 @@ State a concrete recommendation based on the findings. The recommendation must b
 
 Apply SATISFACTORY-CRITERIA.md self-assessment checklist before finalizing. The document is not complete if any red flags are present (vague language, claims without evidence, placeholder recommendations, incomplete coverage).
 
-### Phase 4: Save to QwickBrain
+### Phase 4: Save to Knowledge Base
 
-Save the findings as a spike document using `mcp__qwickbrain__create_document`:
+Save the findings as a spike document using `KB_CREATE_DOCUMENT`:
+- type: `DOC_TYPE_SPIKE`
+- title: [descriptive name for the research question]
+- content: [the full findings document]
 
-```
-doc_type: "spike"
-name: [descriptive name for the research question]
-project: [project name, e.g. "qwickapps" or "faabzi"]
-content: [the full findings document]
-```
+If no SOP plugin is configured, save the findings to `docs/spikes/[name].md` in the repository.
 
 Confirm the document was saved and provide the name so the user can retrieve it later.
 
@@ -129,6 +128,6 @@ Confirm the document was saved and provide the name so the user can retrieve it 
 Close the GitHub issue with a comment that includes:
 - A one-paragraph summary of the key finding
 - The recommendation
-- A link to the QwickBrain spike document by name and type
+- A link to the knowledge base spike document by name and type
 
-Do not close the issue until the spike document is saved in QwickBrain.
+Do not close the issue until the spike document is saved in the knowledge base.

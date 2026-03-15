@@ -28,7 +28,7 @@ Before writing a single line of code or starting any investigation:
 3. If no, ask permission to create one, then create it.
 
 Never begin implementation without an issue number. The issue number belongs in every commit
-message, every QwickBrain memory entry, and every PR description.
+message, every context entry, and every PR description.
 
 ---
 
@@ -143,26 +143,29 @@ Use the label that matches the command type. Do not mix labels within a single i
 
 ---
 
-## Step 4: Store Context in QwickBrain
+## Step 4: Store Issue Context
 
-After the issue is created, store the working context in QwickBrain. This context persists across
+After the issue is created, store the working context. This context persists across
 sessions and is available when resuming work.
 
+Store the working context using `CTX_STORE_ISSUE`:
+- key: "issue-42-context" (following CTX_ISSUE_KEY_FORMAT)
+- content: [the context entry below]
+
+If no SOP plugin is configured, save context to `.claude/issue-context/issue-42.md` in the repository.
+
 ```
-mcp__qwickbrain__set_memory:
-  name: "issue-42-context"
-  content: |
-    Issue: #42 - Add user authentication flow
-    Label: feature
-    Branch: feature/auth-flow (if created)
-    Approach: JWT-based auth with refresh tokens
-    Key files:
-      - src/routes/auth.ts (new)
-      - src/middleware/authenticate.ts (new)
-      - src/services/session.ts (new)
-    Dependencies: jsonwebtoken, bcrypt
-    Notes: Admin pages require role-based guard. See ADR-007 for auth decisions.
-    Status: In progress
+Issue: #42 - Add user authentication flow
+Label: feature
+Branch: feature/auth-flow (if created)
+Approach: JWT-based auth with refresh tokens
+Key files:
+  - src/routes/auth.ts (new)
+  - src/middleware/authenticate.ts (new)
+  - src/services/session.ts (new)
+Dependencies: jsonwebtoken, bcrypt
+Notes: Admin pages require role-based guard. See ADR-007 for auth decisions.
+Status: In progress
 ```
 
 Include in the context entry:
@@ -181,36 +184,37 @@ Update the context entry as the investigation evolves. Do not let it go stale.
 
 ## Step 5: Update Context During Investigation
 
-As work progresses, update the QwickBrain memory entry with findings and decisions.
+As work progresses, update the context entry with findings and decisions.
+
+Update the working context using `CTX_STORE_ISSUE`:
+- key: "issue-42-context" (following CTX_ISSUE_KEY_FORMAT)
+- content: [the updated context entry below]
+
+If no SOP plugin is configured, update `.claude/issue-context/issue-42.md` in the repository.
 
 ```
-mcp__qwickbrain__set_memory:
-  name: "issue-42-context"
-  content: |
-    Issue: #42 - Add user authentication flow
-    Label: feature
-    Branch: feature/auth-flow
-    Approach: JWT-based auth with refresh tokens. Decided against sessions after
-              researching existing auth patterns in src/middleware/. See issue
-              comments for full rationale.
-    Key findings:
-      - Existing middleware at src/middleware/cors.ts:12 shows pattern for request
-        interceptors. Auth middleware should follow the same export shape.
-      - bcrypt is already in package.json:45. No new dependency needed for hashing.
-      - Token expiry: 15 min access, 7 day refresh (matches industry standard).
-    Key files modified:
-      - src/routes/auth.ts (created, login/logout handlers)
-      - src/middleware/authenticate.ts (created, JWT verification)
-      - src/services/session.ts (created, token issuance and refresh)
-    Status: Implementation complete, tests passing. Ready for review.
+Issue: #42 - Add user authentication flow
+Label: feature
+Branch: feature/auth-flow
+Approach: JWT-based auth with refresh tokens. Decided against sessions after
+          researching existing auth patterns in src/middleware/. See issue
+          comments for full rationale.
+Key findings:
+  - Existing middleware at src/middleware/cors.ts:12 shows pattern for request
+    interceptors. Auth middleware should follow the same export shape.
+  - bcrypt is already in package.json:45. No new dependency needed for hashing.
+  - Token expiry: 15 min access, 7 day refresh (matches industry standard).
+Key files modified:
+  - src/routes/auth.ts (created, login/logout handlers)
+  - src/middleware/authenticate.ts (created, JWT verification)
+  - src/services/session.ts (created, token issuance and refresh)
+Status: Implementation complete, tests passing. Ready for review.
 ```
 
-To retrieve context when resuming work:
+To retrieve context when resuming work, use `CTX_GET_ISSUE`:
+- key: "issue-42-context"
 
-```
-mcp__qwickbrain__get_memory:
-  name: "issue-42-context"
-```
+If no SOP plugin is configured, read `.claude/issue-context/issue-42.md` from the repository.
 
 ---
 
@@ -350,10 +354,10 @@ Before marking this skill's responsibilities complete for a given piece of work:
 - [ ] Issue created or identified with correct label
 - [ ] User confirmed issue creation before it was made
 - [ ] Issue number noted and stored
-- [ ] QwickBrain context entry created with issue number, approach, and key files
+- [ ] Context entry created with issue number, approach, and key files
 - [ ] All commits reference the issue number (`Fixes #N` or `Part of #N`)
 - [ ] PR linked to issue when opened
-- [ ] QwickBrain context updated as work progressed
+- [ ] Context entry updated as work progressed
 - [ ] Issue closed on completion with a closing comment
 - [ ] Issue verified as closed (not left open)
 
@@ -371,9 +375,9 @@ creating.
 **Beginning work without an issue**
 
 Stop immediately. Create the issue first. Commit messages without issue references cannot be
-linked to context in GitHub or QwickBrain.
+linked to context in GitHub or the context store.
 
-**Forgetting to update QwickBrain context**
+**Forgetting to update the context entry**
 
 Set the context entry at the start. Update it at every significant decision point. Resume
 sessions by reading it first.

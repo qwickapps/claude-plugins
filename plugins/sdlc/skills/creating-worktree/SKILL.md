@@ -1,113 +1,118 @@
 ---
 name: creating-worktree
-description: This skill should be used when starting any feature, bug fix, refactor, or spike work that requires an isolated git workspace. Trigger phrases include "create a worktree", "set up a worktree", "start a new branch", "isolate this work", or before executing any implementation plan in qwickapps.
+description: This skill should be used when starting any feature, bug fix, refactor, or spike work that requires an isolated git workspace. Trigger phrases include "create a worktree", "set up a worktree", "start a new branch", "isolate this work", or before executing any implementation plan.
 ---
 
 # Creating a Worktree
 
 ## Overview
 
-Git worktrees create isolated workspaces that share the same repository. Each worktree has its own working directory, checked-out branch, and environment. In qwickapps projects, worktrees also require environment files and installed dependencies that raw git commands do not copy.
-
-**Core principle:** Always use the project's create-worktree.sh script when one exists. Never use `git worktree add` or `git checkout -b` directly.
+Git worktrees create isolated workspaces that share the same repository. Each worktree has its own working directory, checked-out branch, and environment. Using worktrees prevents accidental commits to protected branches and supports parallel work streams.
 
 **Announce at start:** "I'm using the creating-worktree skill to set up an isolated workspace."
 
-**Reference:** See WORKTREE-ENFORCEMENT.md for the full enforcement rule that this skill implements.
+**Reference:** See WORKTREE-ENFORCEMENT.md for the enforcement rule this skill implements.
 
 ---
 
-## Step 1: Search for the Project Script
+## Step 1: Check for SOP-Configured Worktree Script
 
-Before doing anything else, search for the create-worktree.sh script.
+Before doing anything else, check whether an SOP plugin has configured a worktree script.
+
+Look for these SOP variables:
+- `WORKTREE_ENFORCED` - Whether worktree creation is mandatory
+- `WORKTREE_SCRIPT` - Path to a project-specific creation script
+- `WORKTREE_PREFIX` - Directory prefix for worktree folders
+
+Also search for a script in the project:
 
 ```bash
-# Search from the current directory upward
 find . -name "create-worktree.sh" -type f | head -5
-
-# Also check known locations
-ls .claude/scripts/create-worktree.sh 2>/dev/null
-ls ../.claude/scripts/create-worktree.sh 2>/dev/null
 ```
 
 **Decision point:**
 
 | Result | Next step |
 |--------|-----------|
-| Script found | Proceed to Step 2 (use the script) |
-| Script not found | Proceed to Step 3 (EnterWorktree fallback) |
+| `WORKTREE_SCRIPT` is set or script found | Proceed to Step 2a (use the script) |
+| No script available | Proceed to Step 2b (EnterWorktree fallback) |
 
 ---
 
-## Step 2: Use the create-worktree.sh Script (Primary Path)
+## Step 2a: Use the Project Script (Primary Path)
 
-When the script is found, use it exclusively. Never substitute git commands.
-
-### Why the script is mandatory
-
-The script does work that git commands cannot replicate automatically:
-
-1. Creates the worktree at `../qwickapps-wt-<name>`
-2. Copies ALL `.env` files from every client and package, preserving directory structure
-3. Copies `.claude/settings.local.json` (personal Claude Code permissions)
-4. Runs `pnpm install` to install dependencies
-
-Skipping the script produces a broken environment: missing environment variables, wrong permissions, missing node_modules. Debugging these failures takes far longer than running the script.
+When a worktree script is available, use it exclusively. Never substitute raw git commands.
 
 ### Run the script
 
 ```bash
-# Basic usage: new branch from current HEAD
-.claude/scripts/create-worktree.sh <worktree-name>
+# Using SOP-configured script path
+$WORKTREE_SCRIPT <name> [base-branch]
 
-# Examples
-.claude/scripts/create-worktree.sh feature-auth
-.claude/scripts/create-worktree.sh bug-917
-.claude/scripts/create-worktree.sh spike-payments
-
-# With existing branch name as second argument
-.claude/scripts/create-worktree.sh my-feature dev
+# Or using discovered script path
+./path/to/create-worktree.sh <name> [base-branch]
 ```
-
-The script creates the worktree at `../qwickapps-wt-<worktree-name>` relative to the repo root.
 
 ### Change into the worktree
 
 ```bash
-cd ../qwickapps-wt-<worktree-name>
+# If WORKTREE_PREFIX is set
+cd ../$WORKTREE_PREFIX<name>
+
+# Otherwise check git worktree list for the path
+git worktree list
 ```
 
 Confirm the working directory changed before proceeding.
 
 ---
 
-## Step 3: EnterWorktree Fallback (No Script Found)
+## Step 2b: EnterWorktree Fallback (No Script Found)
 
-Use this path only when no create-worktree.sh script exists in the project.
+Use this path only when no worktree script exists in the project.
 
 Use the EnterWorktree tool built into Claude Code:
 
 ```
-EnterWorktree(name: "<worktree-name>")
+EnterWorktree(name: "<name>")
 ```
 
-This creates an isolated git worktree and switches the session into it. Run dependency installation manually after:
+This creates an isolated git worktree and switches the session into it.
+
+### Install dependencies
+
+Auto-detect the package manager and install dependencies:
 
 ```bash
-# Node.js projects
-if [ -f package.json ]; then npm install; fi
-if [ -f pnpm-lock.yaml ]; then pnpm install; fi
+# Node.js (check in priority order)
+if [ -f pnpm-lock.yaml ]; then
+    pnpm install
+elif [ -f yarn.lock ]; then
+    yarn install
+elif [ -f package-lock.json ]; then
+    npm install
+elif [ -f package.json ]; then
+    npm install
+fi
 
-# Python projects
-if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-if [ -f pyproject.toml ]; then poetry install; fi
+# Python
+if [ -f requirements.txt ]; then
+    pip install -r requirements.txt
+elif [ -f pyproject.toml ]; then
+    poetry install 2>/dev/null || pip install -e .
+fi
+
+# Go
+if [ -f go.mod ]; then
+    go mod download
+fi
 ```
 
-Note any environment files that need manual copying. Document this gap so the user knows their environment may be incomplete.
+Note any environment files that may need manual copying. Document this gap so the user knows their environment may be incomplete.
 
 ---
 
-## Step 4: Verify the Worktree
+## Step 3: Verify the Worktree
 
 After creation by either path, verify the environment is complete before doing any work.
 
@@ -117,38 +122,38 @@ After creation by either path, verify the environment is complete before doing a
 # 1. Confirm on the correct branch
 git branch --show-current
 
-# 2. Confirm .env files were copied (qwickapps projects)
-ls clients/*/client/.env* 2>/dev/null
-ls clients/*/control-panel/.env* 2>/dev/null
+# 2. Confirm dependencies are installed
+ls node_modules 2>/dev/null || ls vendor 2>/dev/null || echo "Check deps directory"
 
-# 3. Confirm personal settings were copied (qwickapps projects)
-ls .claude/settings.local.json 2>/dev/null
-
-# 4. Confirm dependencies are installed
-ls node_modules 2>/dev/null | head -3
+# 3. Confirm environment files (project-specific)
+# SOP plugins define what to check; without SOP, check for common patterns:
+ls .env* 2>/dev/null
 ```
 
 **If any check fails with the script path:** Stop. Report which check failed. Do not attempt to fix manually. Delete the worktree and re-run the script.
 
 ```bash
-# Delete and recreate if something is wrong
-git worktree remove ../qwickapps-wt-<name>
+# Get worktree path from git
+git worktree list
+
+# Remove and recreate
+cd <original-repo-path>
+git worktree remove <worktree-path>
 git branch -D <name>
-.claude/scripts/create-worktree.sh <name>
+$WORKTREE_SCRIPT <name>
 ```
 
 **If any check fails with the EnterWorktree path:** Report the gap explicitly so the user can decide how to proceed.
 
 ---
 
-## Step 5: Report Ready State
+## Step 4: Report Ready State
 
 After successful verification, report the worktree location and state:
 
 ```
 Worktree ready at <full-path>
 Branch: <branch-name>
-Environment files: copied
 Dependencies: installed
 Ready to implement <task-name>
 ```
@@ -158,37 +163,31 @@ If using the EnterWorktree fallback, note any gaps:
 ```
 Worktree ready at <full-path>
 Branch: <branch-name>
-Note: No create-worktree.sh script found. Environment files were not automatically copied.
-Manual action required: Copy .env files before running the application.
+Note: No project worktree script found. Environment files were not automatically copied.
+Manual action required: Check for .env files or other config that needs copying from the main worktree.
 ```
 
 ---
 
 ## Common Mistakes
 
-### Using git commands directly
+### Using git commands directly when a script exists
 
-**Problem:** `git worktree add` creates the worktree but does not copy .env files, settings, or run pnpm install. The environment is broken before any work begins.
+**Problem:** `git worktree add` creates the worktree but does not run project-specific setup (env files, settings, dependency installation). The environment is broken before any work begins.
 
-**Correct approach:** Always search for and use create-worktree.sh first. Fall back to EnterWorktree only when no script exists.
+**Correct approach:** Always check for a worktree script first. Fall back to EnterWorktree only when no script exists.
 
 ### Skipping verification
 
-**Problem:** Proceeding without verification means discovering broken environment mid-implementation, requiring costly context switching to debug.
+**Problem:** Proceeding without verification means discovering a broken environment mid-implementation, requiring costly context switching to debug.
 
-**Correct approach:** Run all four verification checks before starting any implementation work.
+**Correct approach:** Run all verification checks before starting any implementation work.
 
 ### Attempting to manually fix a broken worktree
 
 **Problem:** Manually copying files or running installs after the fact is error-prone and produces inconsistent results.
 
-**Correct approach:** Delete the worktree and re-run the script. The script is authoritative.
-
-### Assuming the script location
-
-**Problem:** Hard-coding `.claude/scripts/create-worktree.sh` fails if the script is at a different path.
-
-**Correct approach:** Always search with `find . -name "create-worktree.sh"` before assuming the path.
+**Correct approach:** Delete the worktree and re-create it. The script or tool is authoritative.
 
 ---
 
@@ -196,11 +195,11 @@ Manual action required: Copy .env files before running the application.
 
 | Situation | Action |
 |-----------|--------|
-| Script found | Run script, cd into worktree, verify |
-| Script not found | Use EnterWorktree tool, note gaps |
-| Script found but verification fails | Delete worktree, re-run script |
-| Already created worktree manually | Delete it, re-create with script |
-| Unsure of worktree name convention | Check existing worktrees with `git worktree list` |
+| SOP script available | Run script, cd into worktree, verify |
+| No script available | Use EnterWorktree tool, install deps, note gaps |
+| Script verification fails | Delete worktree, re-run script |
+| Tool verification fails | Report gap to user |
+| Already created manually | Delete it, re-create properly |
 
 ---
 
@@ -215,8 +214,6 @@ spike-payments         # Investigation spike
 refactor-api-client    # Refactoring task
 ```
 
-The script creates the worktree directory at `../qwickapps-wt-<name>`, placing it as a sibling to the main repo.
-
 ---
 
 ## When to Create a Worktree
@@ -229,7 +226,7 @@ Worktree creation is required before starting:
 - Investigation spikes
 - Any implementation plan execution
 
-Never implement directly on `main` or `dev`. Even small fixes get their own worktree. The overhead is under 60 seconds with the script. The cost of debugging a broken environment or an accidental direct commit to main is far higher.
+Never implement directly on protected branches. The overhead of creating a worktree is minimal compared to the risk of accidental commits.
 
 ---
 

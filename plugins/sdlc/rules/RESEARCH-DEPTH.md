@@ -8,7 +8,7 @@
 
 **Do NOT make assumptions. Use available research tools to gather evidence BEFORE acting.**
 
-You have powerful research tools (Explore agent, Grep, Chrome automation, QwickBrain MCP). Use them. Shallow research leads to wrong assumptions and wasted effort.
+You have powerful research tools (Explore agent, Grep, Chrome automation, team knowledge base). Use them. Shallow research leads to wrong assumptions and wasted effort.
 
 **Reference:** See COMMON-PATTERNS.md for evidence requirements and research documentation patterns.
 
@@ -80,7 +80,7 @@ You have powerful research tools (Explore agent, Grep, Chrome automation, QwickB
 
 ---
 
-### 4. QwickBrain MCP
+### 4. Team Knowledge Base
 
 **When to use:**
 - Retrieving project documentation
@@ -90,14 +90,16 @@ You have powerful research tools (Explore agent, Grep, Chrome automation, QwickB
 - Getting sprint handoff documents
 
 **Key operations:**
-- `search_documents` - Semantic search
-- `get_document` - Retrieve specific doc
-- `list_documents` - List by type/project
+- `KB_SEARCH_DOCUMENTS` - Semantic search
+- `KB_GET_DOCUMENT` - Retrieve specific doc
+- `KB_LIST_DOCUMENTS` - List by type/project
 
 **Document types:**
-- `doc_type: "adr"` - Architecture decisions
-- `doc_type: "design"`, `"spike"`, `"frd"` - Engineering docs
-- `doc_type: "memory"` - Sprint handoffs
+- `DOC_TYPE_ADR` - Architecture decisions
+- `DOC_TYPE_DESIGN`, `DOC_TYPE_SPIKE`, `DOC_TYPE_FRD` - Engineering docs
+- Sprint handoffs (labeled with "sprint-handoff")
+
+If no SOP plugin is configured (no sop-config block in context), save to local `docs/` directory instead.
 
 **Do NOT:**
 - Reinvent solutions in knowledge base
@@ -126,7 +128,7 @@ You have powerful research tools (Explore agent, Grep, Chrome automation, QwickB
 | Explore unfamiliar area | **Explore** | Systematic investigation |
 | Find specific code | **Grep** | Pattern matching |
 | Test web functionality | **Chrome** | Browser automation |
-| Find past decisions | **QwickBrain** | Knowledge base |
+| Find past decisions | **Knowledge base** | Team knowledge base |
 | Read known file | **Read** | Direct access |
 
 ### Step 3: Execute Deep Research Pattern
@@ -213,7 +215,7 @@ Create evidence trail:
 - [ ] Recording user workflows
 - [ ] Validating frontend changes
 
-### Use QwickBrain When:
+### Use Knowledge Base When:
 - [ ] Looking for past decisions (ADRs)
 - [ ] Finding existing designs/spikes
 - [ ] Getting sprint context/handoffs
@@ -286,7 +288,7 @@ Before implementation:
 - Explore: [what explored]
 - Grep: [patterns searched]
 - Chrome: [what tested]
-- QwickBrain: [documents retrieved]
+- Knowledge base: [documents retrieved]
 
 **Findings:**
 1. [Finding with file:line evidence]
@@ -318,7 +320,7 @@ All workflows enforce research depth:
 **Apply:** RESEARCH-DEPTH.md
 
 **Requirements:**
-1. Choose appropriate tools (Explore, Grep, Chrome, QwickBrain)
+1. Choose appropriate tools (Explore, Grep, Chrome, Knowledge base)
 2. Document findings with evidence
 3. Verify assumptions via code inspection
 

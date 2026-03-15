@@ -90,13 +90,13 @@ Tools to use:
 
 - Read the relevant file and surrounding code
 - Search for existing patterns that conflict or align with the suggestion
-- Check QwickBrain for ADRs or spike documents that may have addressed this decision
+- Check the knowledge base for ADRs or spike documents that may have addressed this decision (use `KB_SEARCH_DOCUMENTS`)
 - Run the existing tests to understand what behavior is currently guaranteed
 
 If verification is not straightforward, say so:
 
 ```
-"Cannot verify this without running the E2E suite against the macmini environment.
+"Cannot verify this without running the E2E suite against the test environment.
 Should I investigate further, or proceed with caution and note this as a risk?"
 ```
 

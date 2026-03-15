@@ -82,7 +82,7 @@ For decisions that will be non-obvious to future readers, note:
 - Why this approach was chosen.
 - What alternatives were rejected and why.
 
-If the decision is significant enough to affect the team long-term, recommend creating an ADR via QwickBrain.
+If the decision is significant enough to affect the team long-term, recommend creating an ADR using `KB_CREATE_DOCUMENT` with type `DOC_TYPE_ADR`. If no SOP plugin is configured, save ADRs to `docs/adrs/` in the repository.
 
 ## Principles
 

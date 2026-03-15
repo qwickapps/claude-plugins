@@ -31,7 +31,7 @@ For frontend work, also load `sdlc:designing-ux` to address UI/UX considerations
 
 For complex features with significant architectural impact, use EnterPlanMode to present the design to the user and get explicit sign-off before proceeding to planning.
 
-Document design decisions with rationale. Record any Architecture Decision Records (ADRs) in QwickBrain using `mcp__qwickbrain__create_document` with `doc_type: "adr"` if the decision is significant and long-lived.
+Document design decisions with rationale. Record any Architecture Decision Records (ADRs) using `KB_CREATE_DOCUMENT` with type `DOC_TYPE_ADR` if the decision is significant and long-lived. If no SOP plugin is configured, save ADRs to `docs/adrs/` in the repository.
 
 ### Phase 3: Planning
 

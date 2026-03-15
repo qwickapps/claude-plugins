@@ -43,32 +43,22 @@ Document the sprint plan
 
 ---
 
-## Step 1: Load Previous Sprint Handoff from QwickBrain
+## Step 1: Load Previous Sprint Handoff
 
 The first action at sprint kickoff is always to retrieve the previous sprint's handoff document.
 This document contains completed work, remaining issues, blockers, and lessons learned from the
 last cycle.
 
-Search QwickBrain for the handoff:
+Search for the handoff using `KB_SEARCH_DOCUMENTS`:
+- query: "sprint handoff"
 
-```
-mcp__qwickbrain__search_memories:
-  query: "sprint handoff"
-```
+If a specific sprint number is known, retrieve it directly using `KB_GET_DOCUMENT`:
+- key: "sprint-N-handoff"
 
-If a specific sprint number is known, retrieve it directly:
+Also search for any open issue context stored during the previous sprint using `KB_SEARCH_DOCUMENTS`:
+- query: "issue context"
 
-```
-mcp__qwickbrain__get_memory:
-  name: "sprint-N-handoff"
-```
-
-Also search for any open issue context stored during the previous sprint:
-
-```
-mcp__qwickbrain__search_memories:
-  query: "issue context"
-```
+If no SOP plugin is configured, look for handoff documents in `docs/sprints/` in the repository.
 
 **If no handoff document is found:**
 
@@ -251,72 +241,76 @@ note:
 
 ---
 
-## Step 7: Document the Sprint Plan in QwickBrain
+## Step 7: Document the Sprint Plan
 
-After the backlog is built and blockers are identified, store the sprint plan in QwickBrain.
+After the backlog is built and blockers are identified, store the sprint plan.
 This document is referenced throughout the sprint and used to generate the closing-sprint
 handoff at the end.
 
+Store the sprint plan using `KB_CREATE_DOCUMENT`:
+- type: `DOC_TYPE_SPIKE`
+- title: "Sprint N Plan"
+- labels: ["sprint-plan", "sprint-N"]
+- content: [the plan document below]
+
+If no SOP plugin is configured, save to `docs/sprints/sprint-N-plan.md` in the repository.
+
 ```
-mcp__qwickbrain__create_document:
-  name: "sprint-N-plan"
-  doc_type: "memory"
-  content: |
-    # Sprint N Plan
+# Sprint N Plan
 
-    **Date:** YYYY-MM-DD
-    **Sprint goal:** [Statement from the user]
-    **Capacity:** [Working days / team members / known absences]
+**Date:** YYYY-MM-DD
+**Sprint goal:** [Statement from the user]
+**Capacity:** [Working days / team members / known absences]
 
-    ## Previous Sprint Summary
-    [Key points from the handoff document, or "No prior handoff found"]
+## Previous Sprint Summary
+[Key points from the handoff document, or "No prior handoff found"]
 
-    ## Open Issues at Sprint Start
-    [List with issue numbers, titles, and labels]
-    - #42 feature: Add user authentication flow
-    - #38 bug: Cart total does not update on quantity change
-    - #51 chore: Update all dependencies to latest minor versions
+## Open Issues at Sprint Start
+[List with issue numbers, titles, and labels]
+- #42 feature: Add user authentication flow
+- #38 bug: Cart total does not update on quantity change
+- #51 chore: Update all dependencies to latest minor versions
 
-    ## Open PRs at Sprint Start
-    [List with PR numbers, titles, and current state]
-    - PR #45: feat(api): add product search endpoint — Awaiting review
+## Open PRs at Sprint Start
+[List with PR numbers, titles, and current state]
+- PR #45: feat(api): add product search endpoint — Awaiting review
 
-    ## Sprint Backlog
-    [Issues committed to this sprint with their tasks]
+## Sprint Backlog
+[Issues committed to this sprint with their tasks]
 
-    ### #42 - Add user authentication flow (feature)
-    - [ ] Create JWT session service
-    - [ ] Add login route handler
-    - [ ] Add logout route handler
-    - [ ] Add JWT verification middleware
-    - [ ] Write tests for session service
-    - [ ] Write tests for auth routes
-    - [ ] Write tests for auth middleware
-    - [ ] Verify E2E: login/logout flow in browser
+### #42 - Add user authentication flow (feature)
+- [ ] Create JWT session service
+- [ ] Add login route handler
+- [ ] Add logout route handler
+- [ ] Add JWT verification middleware
+- [ ] Write tests for session service
+- [ ] Write tests for auth routes
+- [ ] Write tests for auth middleware
+- [ ] Verify E2E: login/logout flow in browser
 
-    ### #38 - Fix cart total bug (bug)
-    - [ ] Reproduce bug and identify root cause
-    - [ ] Write failing regression test
-    - [ ] Fix root cause
-    - [ ] Verify test passes and E2E behavior is correct
+### #38 - Fix cart total bug (bug)
+- [ ] Reproduce bug and identify root cause
+- [ ] Write failing regression test
+- [ ] Fix root cause
+- [ ] Verify test passes and E2E behavior is correct
 
-    ## Blockers
-    [Issues that cannot start due to external dependencies]
-    - #51 chore: Blocked on confirming no breaking changes in the pnpm 9 upgrade.
-      Owner: Raaj. Expected resolution: by Wednesday.
+## Blockers
+[Issues that cannot start due to external dependencies]
+- #51 chore: Blocked on confirming no breaking changes in the pnpm 9 upgrade.
+  Owner: Raaj. Expected resolution: by Wednesday.
 
-    ## Dependencies
-    [Task ordering constraints within the sprint]
-    - Auth middleware depends on session service being complete.
+## Dependencies
+[Task ordering constraints within the sprint]
+- Auth middleware depends on session service being complete.
 
-    ## Not in Sprint (Explicit Deferrals)
-    [Issues that were explicitly deferred]
-    - #47 feature: Dashboard analytics — Deferred to next sprint. Awaiting design approval.
+## Not in Sprint (Explicit Deferrals)
+[Issues that were explicitly deferred]
+- #47 feature: Dashboard analytics — Deferred to next sprint. Awaiting design approval.
 
-    ## Sprint Priorities (in order)
-    1. #38 bug (blocking user checkout, high urgency)
-    2. #42 feature (sprint goal requirement)
-    3. #51 chore (low effort, high value)
+## Sprint Priorities (in order)
+1. #38 bug (blocking user checkout, high urgency)
+2. #42 feature (sprint goal requirement)
+3. #51 chore (low effort, high value)
 ```
 
 After storing the plan, confirm with the user that the plan is accurate and complete before
@@ -347,7 +341,7 @@ Wait for confirmation before marking the kickoff complete.
 
 Before declaring sprint kickoff complete:
 
-- [ ] Previous sprint handoff loaded from QwickBrain (or no-handoff documented)
+- [ ] Previous sprint handoff loaded from knowledge base (or no-handoff documented)
 - [ ] Open issues reviewed in full (all labels)
 - [ ] Open PRs reviewed and flagged to user
 - [ ] Sprint goal captured from user (one sentence, outcome-focused)
@@ -357,7 +351,7 @@ Before declaring sprint kickoff complete:
 - [ ] Sprint backlog built (one TaskCreate per subtask per issue)
 - [ ] Blockers identified and noted with owners
 - [ ] Dependencies between tasks identified
-- [ ] Sprint plan document stored in QwickBrain as `sprint-N-plan`
+- [ ] Sprint plan document stored in knowledge base as `sprint-N-plan`
 - [ ] Summary presented to user and confirmed
 
 If any item is unchecked, complete it before beginning implementation work.

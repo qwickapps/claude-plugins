@@ -41,6 +41,12 @@
       "description": "Encrypted environment variable management with SOPS+age. Resolve, generate, and sync env vars across local dev, GitHub Actions, and CapRover from a single encrypted environments.yml.",
       "source": "./plugins/secrets",
       "category": "devops"
+    },
+    {
+      "name": "qwickapps-sop",
+      "description": "QwickApps Standard Operating Procedures. Optional plugin that configures SDLC skills to use QwickApps MCP tools (Confluence, Projects API, Secrets API) for knowledge base, issue context, sprint management, and worktree-driven development.",
+      "source": "./plugins/qwickapps-sop",
+      "category": "development"
     }
   ]
 }

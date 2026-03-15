@@ -51,8 +51,8 @@ is not working correctly.
 
 ### /research
 Deep technical investigation before a decision. Phases: define the question, investigate using
-all available tools (codebase, documentation, package registries, QwickBrain), document findings
-with evidence, save to QwickBrain as a spike document, and close the issue. Creates a GitHub
+all available tools (codebase, documentation, package registries, knowledge base), document findings
+with evidence, save as a spike document to the knowledge base, and close the issue. Creates a GitHub
 issue labeled `research`. Use when a decision requires understanding before acting.
 
 ### /refactor
@@ -158,13 +158,13 @@ Verifies all tests pass first. Load when implementation is complete and ready to
 ### Project Management
 
 **tracking-issues** — Every piece of work starts with a GitHub issue. Create via gh CLI (ask
-permission first). Store local context in QwickBrain. Reference issue numbers in commits. Close
+permission first). Store local context in the knowledge base. Reference issue numbers in commits. Close
 on completion. Load at the start of every command workflow.
 
-**starting-sprint** — Load previous sprint handoff from QwickBrain. Review open issues. Set
+**starting-sprint** — Load previous sprint handoff from the knowledge base. Review open issues. Set
 sprint goals. Create sprint backlog. Load when beginning a new sprint cycle.
 
-**closing-sprint** — Create a handoff document with lessons learned. Store in QwickBrain. Update
+**closing-sprint** — Create a handoff document with lessons learned. Store in the knowledge base. Update
 the GitHub project. Load when a sprint is ending.
 
 ### Design
@@ -228,7 +228,7 @@ All work in this system starts with a GitHub issue. Issues provide:
 - A record of what was worked on and why
 - Commit linkage (commits reference the issue number)
 - A closure mechanism (issue closed when work is done)
-- Sprint context for tracking-issues and QwickBrain
+- Sprint context for tracking-issues and the knowledge base
 
 The tracking-issues skill handles issue creation. Every command workflow loads it at the start.
 

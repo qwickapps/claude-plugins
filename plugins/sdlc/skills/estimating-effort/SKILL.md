@@ -17,7 +17,7 @@ Estimates are saved to: `docs/estimates/YYYY-MM-DD-<feature-name>-estimate.md` u
 
 **Confidence must be stated explicitly.** Every estimate has a confidence level: High, Medium, or Low. The confidence level reflects how well the work is understood, not how optimistic the estimator is. A low-confidence estimate is still useful — it tells the user that more investigation is needed before the number can be trusted.
 
-**Unknowns require investigation, not assumption.** If a component of the work is not understood well enough to estimate, investigate it before estimating. Use Grep, file inspection, QwickBrain document search, or targeted clarifying questions. Do not estimate what has not been studied.
+**Unknowns require investigation, not assumption.** If a component of the work is not understood well enough to estimate, investigate it before estimating. Use Grep, file inspection, knowledge base document search, or targeted clarifying questions. Do not estimate what has not been studied.
 
 **Scope ambiguity must be resolved before estimating.** Ask clarifying questions about scope. An estimate built on an ambiguous scope is not an estimate — it is a guess that will produce a surprise later.
 
@@ -53,7 +53,7 @@ Investigate before estimating. Read the relevant code, check the existing test c
 **Research methods:**
 - Read relevant source files to understand current state
 - Check the test suite to understand coverage and test infrastructure
-- Search QwickBrain for related design documents, spikes, or ADRs
+- Search the knowledge base for related design documents, spikes, or ADRs using `KB_SEARCH_DOCUMENTS`
 - Look at git history for related changes
 - Identify third-party dependencies and check their documentation
 
@@ -202,4 +202,4 @@ An estimate that becomes invalid should be re-estimated before proceeding. Do no
 
 **sdlc:writing-plans** — The plan produced by writing-plans can be used as input to refine an estimate. Each task in the plan corresponds to a component in the estimate.
 
-**QwickBrain documents** — Search for related SPIKE, FRD, and DESIGN documents before estimating. Prior investigation often contains effort notes or complexity observations relevant to the current estimate.
+**Knowledge base documents** — Search for related SPIKE, FRD, and DESIGN documents using `KB_SEARCH_DOCUMENTS` before estimating. Prior investigation often contains effort notes or complexity observations relevant to the current estimate. If no SOP plugin is configured, check `docs/` in the repository.

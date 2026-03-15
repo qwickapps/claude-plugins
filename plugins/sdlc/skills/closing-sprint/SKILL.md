@@ -5,14 +5,14 @@ description: >
   the next sprint. Trigger phrases include: "close sprint", "end sprint", "sprint review",
   "sprint wrap-up", "sprint retrospective", "finish the sprint", "wrap up this sprint",
   "let's close out the sprint", "sprint is over". Auto-loads when any of these phrases are
-  detected. Always produce a handoff document stored in QwickBrain before declaring the
+  detected. Always produce a handoff document stored in the knowledge base before declaring the
   sprint closed.
 ---
 
 # Closing a Sprint
 
 End every sprint by capturing what was accomplished, what rolled over, what blocked progress,
-and what the team learned. Store this knowledge in QwickBrain so the next sprint can start
+and what the team learned. Store this knowledge in the knowledge base so the next sprint can start
 from an informed position.
 
 **Core principle:** A sprint that ends without a handoff document loses its lessons and forces
@@ -66,20 +66,16 @@ For each completed task, note:
 - The issue it was tied to
 - Any significant decisions or implementation notes worth preserving
 
-If QwickBrain context entries were stored during the sprint, retrieve them now. They contain
+If context entries were stored during the sprint, retrieve them now. They contain
 investigation findings, decisions, and notes that belong in the handoff.
 
-```
-mcp__qwickbrain__search_memories:
-  query: "issue context"
-```
+Search for issue context using `KB_SEARCH_DOCUMENTS`:
+- query: "issue context"
 
-Retrieve each relevant memory:
+Retrieve each relevant entry using `CTX_GET_ISSUE`:
+- key: "issue-42-context"
 
-```
-mcp__qwickbrain__get_memory:
-  name: "issue-42-context"
-```
+If no SOP plugin is configured, look for context files in `.claude/issue-context/` in the repository.
 
 ---
 
@@ -183,7 +179,7 @@ Wait for the answer. Specific, actionable process changes are more valuable than
 commitments. Examples:
 
 - "Assign a reviewer at the time the PR is opened, not after the first review cycle"
-- "Create QwickBrain context entries at the start of every issue, not only on complex ones"
+- "Create context entries at the start of every issue, not only on complex ones"
 - "Surface blockers in the issue tracker the same day they are discovered"
 
 **Question 4: What is the top recommendation for next sprint?**
@@ -218,15 +214,19 @@ If no GitHub project board is in use, skip this step and note that in the handof
 
 ## Step 6: Create and Store the Handoff Document
 
-With all the evidence gathered, create the sprint handoff document and store it in QwickBrain.
+With all the evidence gathered, create the sprint handoff document and store it in the knowledge base.
 This document is the primary input to the next sprint's kickoff (starting-sprint skill, Step 1).
 
+Store the handoff document using `KB_CREATE_DOCUMENT`:
+- type: `DOC_TYPE_SPIKE`
+- title: "Sprint N Handoff"
+- labels: ["sprint-handoff", "sprint-N"]
+- content: [the handoff document below]
+
+If no SOP plugin is configured, save to `docs/sprints/sprint-N-handoff.md` in the repository.
+
 ```
-mcp__qwickbrain__create_document:
-  name: "sprint-N-handoff"
-  doc_type: "memory"
-  content: |
-    # Sprint N Handoff
+# Sprint N Handoff
 
     **Sprint:** N
     **Close date:** YYYY-MM-DD
@@ -268,7 +268,7 @@ mcp__qwickbrain__create_document:
     ## Key Decisions Made This Sprint
 
     - Chose JWT over session-based auth based on stateless API requirements.
-      Evidence stored in: issue-42-context (QwickBrain). ADR created: ADR-007.
+      Evidence stored in: issue-42-context (knowledge base). ADR created: ADR-007.
     - Cart total fix was a UI state bug, not a backend issue. No API changes needed.
       Root cause: React state not triggering re-render on quantity change.
       Fixed at: src/components/Cart/CartItem.tsx:47.
@@ -276,7 +276,7 @@ mcp__qwickbrain__create_document:
     ## Lessons Learned
 
     ### What went well
-    - Setting up QwickBrain context entries at issue start made resuming sessions fast.
+    - Setting up context entries at issue start made resuming sessions fast.
     - Writing the regression test for #38 before the fix caught two edge cases that
       were not in the original bug report.
 
@@ -305,18 +305,23 @@ mcp__qwickbrain__create_document:
     - Blockers surfaced: 1 (resolved), 1 (active)
 ```
 
-Also store a short memory entry pointing to the handoff document for easy search retrieval:
+Also store a short summary entry pointing to the handoff document for easy search retrieval.
+
+Store the sprint summary using `KB_CREATE_DOCUMENT`:
+- type: `DOC_TYPE_SPIKE`
+- title: "Sprint N Summary"
+- labels: ["sprint-summary", "sprint-N"]
+- content: [the summary below]
+
+If no SOP plugin is configured, append the summary to the handoff document in `docs/sprints/sprint-N-handoff.md`.
 
 ```
-mcp__qwickbrain__set_memory:
-  name: "sprint-N-summary"
-  content: |
-    Sprint N closed YYYY-MM-DD.
-    Goal: [one sentence]
-    Completed: #42, #38, #51
-    Rolled over: #47 (blocked on design), PR #48 (awaiting review)
-    Handoff: sprint-N-handoff (QwickBrain memory)
-    Top lesson: Assign reviewers when PRs are opened.
+Sprint N closed YYYY-MM-DD.
+Goal: [one sentence]
+Completed: #42, #38, #51
+Rolled over: #47 (blocked on design), PR #48 (awaiting review)
+Handoff: sprint-N-handoff
+Top lesson: Assign reviewers when PRs are opened.
 ```
 
 ---
@@ -333,7 +338,7 @@ Cover:
 - Rolled-over items (issues and PRs)
 - Active blockers carrying forward
 - Top recommendation for next sprint
-- Location of the full handoff (QwickBrain: sprint-N-handoff)
+- Location of the full handoff (knowledge base: sprint-N-handoff)
 
 Ask: "Does this sprint summary look accurate? Is there anything missing before I mark the
 sprint closed?"
@@ -367,14 +372,14 @@ problems pollute the backlog and make the next sprint's planning harder.
 Before declaring sprint closure complete:
 
 - [ ] Completed tasks reviewed (TaskList)
-- [ ] QwickBrain context entries retrieved for all active issues
+- [ ] Context entries retrieved for all active issues
 - [ ] Merged PRs listed with issue references
 - [ ] Open PRs identified and flagged for rollover
 - [ ] Open issues reviewed for rollover or deferral decisions
 - [ ] User consulted on ambiguous rollover decisions
 - [ ] Lessons learned captured (what went well, what did not, what changes)
 - [ ] GitHub project board updated (or skipped with reason noted)
-- [ ] Handoff document created in QwickBrain as `sprint-N-handoff`
+- [ ] Handoff document created in knowledge base as `sprint-N-handoff`
 - [ ] Summary memory stored as `sprint-N-summary`
 - [ ] Summary presented to user and confirmed
 - [ ] All completed issues verified as closed in GitHub
@@ -403,10 +408,10 @@ do it automatically.
 opened" is actionable. Push for specific, concrete lessons. Vague retrospective notes produce
 no behavior change.
 
-**Not storing the handoff in QwickBrain**
+**Not storing the handoff in the knowledge base**
 
 A handoff document that exists only in a conversation context disappears between sessions. The
-QwickBrain entry is the persistent record that the starting-sprint skill reads at the next
+knowledge base entry is the persistent record that the starting-sprint skill reads at the next
 kickoff. If it is not stored, the next sprint starts blind.
 
 **Making rollover decisions without user input**
