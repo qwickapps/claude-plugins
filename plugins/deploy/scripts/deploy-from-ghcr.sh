@@ -159,7 +159,7 @@ if [ -n "$EXISTING_IDS" ]; then
     curl -s -k -X POST "$CAPROVER_URL/api/v2/user/registries/delete" \
       -H "Content-Type: application/json" \
       -H "x-captain-auth: $TOKEN" \
-      -d "{\"id\":\"$registry_id\"}" >/dev/null 2>&1 || true
+      -d "{\"registryId\":\"$registry_id\"}" >/dev/null 2>&1 || true
   done <<< "$EXISTING_IDS"
 fi
 

@@ -282,7 +282,7 @@ if [ -n "$EXISTING_IDS" ]; then
     DELETE_RESP=$(curl -s -k -X POST "$ROUTE_CAPROVER_URL/api/v2/user/registries/delete" \
       -H "Content-Type: application/json" \
       -H "x-captain-auth: $TOKEN" \
-      -d "$(jq -n --arg id "$registry_id" '{id: $id}')")
+      -d "$(jq -n --arg id "$registry_id" '{registryId: $id}')")
     DELETE_ST=$(echo "$DELETE_RESP" | jq -r '.status' 2>/dev/null || echo "unknown")
     if [ "$DELETE_ST" != "100" ]; then
       echo "  Warning: Failed to delete registry entry $registry_id (status: $DELETE_ST)"
