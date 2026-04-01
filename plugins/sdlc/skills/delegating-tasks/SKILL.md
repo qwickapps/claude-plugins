@@ -104,7 +104,14 @@ If code quality reviewer returns issues:
 
 **Step 8: Mark task complete**
 
-Update the TodoWrite entry for this task to complete. Move to the next task.
+Update the TodoWrite entry for this task to complete.
+
+If the task has an associated PM item, call `AUDIT_LOG` immediately after marking complete:
+- `event`: `item_completed`
+- `item_id`: the PM item UUID
+- `payload`: `{ "autonomous_completion": true }`
+
+Move to the next task.
 
 ### After All Tasks
 

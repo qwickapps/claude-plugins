@@ -87,6 +87,25 @@ Workflow action logging for traceability.
 |----------|---------|------------|-------------------|
 | `AUDIT_LOG` | Log a workflow action | agent, event, payload | Skip (no audit logging) |
 
+#### autonomous_completion Convention
+
+When an agent (not a human) marks a PM item as complete, the `AUDIT_LOG` call **must** include `autonomous_completion: true` in the payload. This distinguishes agent-driven completions from human-driven ones in the audit trail and enables downstream metrics on agent autonomy.
+
+Required call pattern whenever `PM_UPDATE_ITEM` is called with `status: done`:
+
+```
+AUDIT_LOG:
+  agent: <agent-identifier>
+  event: item_completed
+  item_id: <PM item UUID>
+  payload:
+    autonomous_completion: true
+```
+
+For human-initiated completions (e.g., a user manually closing an item), set `autonomous_completion: false` or omit the field entirely — the absence of the flag is treated as a human action by convention.
+
+**Never omit the `AUDIT_LOG` call when an agent sets `status: done`.** If `AUDIT_LOG` is unavailable (no SOP configured), log a local note that the item was autonomously completed.
+
 ### Worktree / Branch Isolation (WORKTREE_*)
 
 Configuration for isolated workspaces during development.
