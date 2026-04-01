@@ -193,6 +193,11 @@ Before marking the skill complete, run this checklist:
 - [ ] can describe a concrete failure mode the skill prevents
 - [ ] the skill does not duplicate an existing skill
 
+**Protocol improvement (if applicable):**
+- [ ] if the skill introduces new or changed platform process, a KB spec document exists with labels `["protocol-improvement", "skill-update", "<skill-name>"]`
+- [ ] KB document title follows: "Protocol Improvement: <skill-name> — <description>"
+- [ ] KB document includes Before/After behavioral change description
+
 ---
 
 ## Common Mistakes
@@ -276,6 +281,69 @@ available skills. Add the new skill name and a one-line description to that list
 
 If the plugin does not yet have a skill-activation hook, create one following the format in the
 hooks directory.
+
+---
+
+## Protocol Improvement Labeling
+
+When a new or updated skill changes how the platform operates — how agents execute a lifecycle
+process, how work is tracked, how decisions are documented, or how quality is enforced — record
+the change as a protocol improvement in the knowledge base.
+
+This enables the PM agent's monthly health report to count protocol improvements per calendar
+month, supporting the Platform Maturity metric `protocol_improvements_proposed_per_month`
+(L3 criterion, L4 target ≥ 3/month). See the KB label taxonomy for the full definition:
+"KB Label Taxonomy — protocol-improvement" (spec, label: `label-taxonomy`).
+
+**Apply the `protocol-improvement` label when the skill:**
+
+- Introduces new steps, gates, or constraints in an existing workflow
+- Changes how agents execute a recurring lifecycle process (sprint, feature, release, review)
+- Establishes a new naming convention, label, or taxonomy
+- Adds a quality bar or decision criterion that was previously absent
+- Closes a measurement gap in a Platform Maturity metric
+
+**Do NOT apply the label when the skill:**
+
+- Only improves documentation clarity without changing behavior
+- Corrects instructions to match already-intended behavior (a fix, not an improvement)
+- Covers a purely technical how-to with no workflow implications
+
+**Procedure:**
+
+After the skill is validated (Step 6), create a KB document to record the protocol improvement:
+
+```
+KB_CREATE_DOCUMENT:
+  type: spec
+  title: "Protocol Improvement: <skill-name> — <one-line description>"
+  labels: ["protocol-improvement", "skill-update", "<skill-name>"]
+  content: [use format below]
+```
+
+KB document content format:
+
+```markdown
+## Protocol Improvement: <skill-name>
+
+**Date:** YYYY-MM-DD
+**Skill:** <skill-name>
+**Type:** New skill | Updated skill
+
+### What Changed
+[2–4 sentences describing the new or changed behavior the skill enforces.]
+
+### Why It Matters
+[The problem this solves or the gap it closes — one or two sentences.]
+
+### Behavioral Change
+Before: [What the agent did without this skill / before the update]
+After: [What the agent does now]
+```
+
+If the skill update is minor (wording, example updates, no procedure change), skip the KB
+document. If uncertain, create it — the cost of an extra KB entry is low; the cost of a missing
+protocol improvement record is a gap in the maturity metric.
 
 ---
 

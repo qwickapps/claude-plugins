@@ -189,6 +189,44 @@ it be?"
 
 This produces the highlight that appears first in the handoff document's lessons section.
 
+**Question 5: Do any of this sprint's process changes represent a protocol improvement?**
+
+"Did we change how we work this sprint — a new convention, a revised process, a new workflow
+gate, or a platform-level decision? If so, which items should be tagged as protocol improvements?"
+
+Wait for the answer. A protocol improvement is any change that alters how the platform or team
+operates going forward — not individual feature work, but a structural change to process or tooling.
+
+Examples of protocol improvements:
+- Establishing a new label convention (e.g., `protocol-improvement` itself)
+- Revising a recurring skill to add a new step or gate
+- Adopting a new tool or workflow for the entire team
+- Defining a new KB document type or taxonomy entry
+
+Record each protocol improvement identified. These will be tagged in Step 6.
+
+**Question 6: Agent-created item accuracy rating (metric I5 — goal_decomposition_accuracy)**
+
+"This sprint, how accurately did agent-created items (tasks, sub-tasks, and decomposed work
+items) reflect the actual work that needed to be done? Please rate from 0 to 100:
+
+  - 0–20: Mostly wrong — scope, effort, or breakdown was significantly off
+  - 21–40: Rough shape correct but major gaps or errors
+  - 41–60: About half accurate — meaningful corrections were required
+  - 61–80: Mostly accurate — minor adjustments needed
+  - 81–100: Highly accurate — agent decomposition matched actual work closely
+
+Enter a number from 0 to 100, and optionally describe what caused any inaccuracies (e.g.,
+unclear requirements, missing context, scope creep, over- or under-decomposition)."
+
+Wait for the numeric rating and optional notes. Record:
+
+- `goal_decomposition_accuracy`: the 0–100 integer
+- `goal_decomposition_accuracy_notes`: any freeform explanation provided
+
+This rating feeds into metric I5. It is stored in the handoff document's Metrics section and
+as an item context entry (both in Step 6) so the PM agent can read and trend it across sprints.
+
 ---
 
 ## Step 5: Update GitHub Project Board
@@ -303,6 +341,8 @@ If no SOP plugin is configured, save to `docs/sprints/sprint-N-handoff.md` in th
     - PRs merged: 3
     - PRs open at close: 1
     - Blockers surfaced: 1 (resolved), 1 (active)
+    - goal_decomposition_accuracy (I5): [0–100 rating from retro Q6]
+    - goal_decomposition_accuracy_notes: [optional explanation]
 ```
 
 Also store a short summary entry pointing to the handoff document for easy search retrieval.
@@ -322,7 +362,58 @@ Completed: #42, #38, #51
 Rolled over: #47 (blocked on design), PR #48 (awaiting review)
 Handoff: sprint-N-handoff
 Top lesson: Assign reviewers when PRs are opened.
+goal_decomposition_accuracy (I5): [rating]
 ```
+
+### Protocol Improvement Tagging
+
+For each protocol improvement identified in Step 4 (Question 5), create or update a KB document
+tagged with the `protocol-improvement` label:
+
+Store each protocol improvement using `KB_CREATE_DOCUMENT`:
+- type: `spec`
+- title: "Protocol Improvement: <topic> — <one-line description>"
+- labels: ["protocol-improvement", "sprint-N", "<topic>"]
+- content: [use the protocol improvement format from the KB label taxonomy]
+
+If a KB document already exists for the improvement, update it with `KB_UPDATE_DOCUMENT` to
+add the `protocol-improvement` label.
+
+Add a **Protocol Improvements** section to the sprint handoff document listing each tagged item:
+
+```
+## Protocol Improvements This Sprint
+
+- [Title of improvement] — [KB doc ID or link]
+- [Title of improvement] — [KB doc ID or link]
+```
+
+If no protocol improvements were identified, note "None identified this sprint" in the handoff.
+
+### I5 Accuracy Rating — Item Context Storage
+
+After storing the handoff document, store the `goal_decomposition_accuracy` rating as an item
+context entry so the PM agent can query it directly across sprints.
+
+Store the accuracy rating using `CTX_STORE_ISSUE`:
+- item_id: the UUID of the sprint goal or the closing-sprint work item
+- type: `note`
+- content:
+
+```
+metric: goal_decomposition_accuracy (I5)
+sprint: N
+close_date: YYYY-MM-DD
+rating: [0–100]
+notes: [optional explanation from retro Q6]
+handoff_doc_id: [KB document ID of "Sprint N Handoff"]
+```
+
+If no SOP plugin is configured, append this block to the handoff document under a
+`## I5 Accuracy Rating` heading.
+
+The PM agent reads these entries by searching item context for `metric: goal_decomposition_accuracy`
+across sprint items and computing the trend over time.
 
 ---
 
@@ -338,6 +429,7 @@ Cover:
 - Rolled-over items (issues and PRs)
 - Active blockers carrying forward
 - Top recommendation for next sprint
+- `goal_decomposition_accuracy` (I5) rating recorded this sprint
 - Location of the full handoff (knowledge base: sprint-N-handoff)
 
 Ask: "Does this sprint summary look accurate? Is there anything missing before I mark the
@@ -378,9 +470,13 @@ Before declaring sprint closure complete:
 - [ ] Open issues reviewed for rollover or deferral decisions
 - [ ] User consulted on ambiguous rollover decisions
 - [ ] Lessons learned captured (what went well, what did not, what changes)
+- [ ] goal_decomposition_accuracy (I5) rating collected and stored in handoff Metrics section
+- [ ] goal_decomposition_accuracy (I5) rating stored as item context entry via CTX_STORE_ISSUE
 - [ ] GitHub project board updated (or skipped with reason noted)
 - [ ] Handoff document created in knowledge base as `sprint-N-handoff`
 - [ ] Summary memory stored as `sprint-N-summary`
+- [ ] Protocol improvements from retro identified and tagged with `protocol-improvement` label in KB
+- [ ] Sprint handoff includes "Protocol Improvements This Sprint" section (or notes none)
 - [ ] Summary presented to user and confirmed
 - [ ] All completed issues verified as closed in GitHub
 
@@ -419,3 +515,9 @@ kickoff. If it is not stored, the next sprint starts blind.
 Do not silently carry issues forward or silently close them. Present each ambiguous issue to
 the user and wait for an explicit decision. The user knows the business context for whether
 work should continue, defer, or be dropped.
+
+**Skipping the I5 accuracy rating**
+
+The `goal_decomposition_accuracy` rating (Question 6) is mandatory, not optional. Skipping it
+breaks the PM agent's trend data for metric I5. If the user declines to provide a number, record
+`null` with a note explaining why it was not collected. Do not silently omit the metric.
