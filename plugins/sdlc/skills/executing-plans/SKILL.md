@@ -36,6 +36,10 @@ The default batch size is 3 tasks. For each task in the batch:
 2. Execute each step in the task exactly as written in the plan
 3. Run verifications as specified — do not skip them
 4. Mark the task as completed using TaskUpdate
+5. If the task has an associated PM item, call `AUDIT_LOG` immediately after marking complete:
+   - `event`: `item_completed`
+   - `item_id`: the PM item UUID
+   - `payload`: `{ "autonomous_completion": true }`
 
 Execute steps literally. The plan was written to be followed as written. Do not substitute alternative implementations, skip steps that seem redundant, or combine steps to save time.
 
