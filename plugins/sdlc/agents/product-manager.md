@@ -1,6 +1,7 @@
 ---
 name: product-manager
 description: Product requirements manager for gathering and refining requirements. Use when the /feature command needs requirements discovery, user story writing, acceptance criteria definition, or feature prioritization.
+model: sonnet
 capabilities:
   - Requirements gathering through interactive conversation
   - User story and acceptance criteria writing

@@ -1,6 +1,7 @@
 ---
 name: architect
 description: Senior software architect for designing implementation approaches. Use when /feature or /refactor requires architectural decisions, pattern selection, or system design. Returns step-by-step plans, identifies critical files, and considers architectural trade-offs.
+model: sonnet
 capabilities:
   - Multi-tier architecture design
   - API specification

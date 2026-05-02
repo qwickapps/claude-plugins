@@ -1,6 +1,7 @@
 ---
 name: code-reviewer
 description: Senior code reviewer specialized in quality analysis and improvement suggestions. Use when dispatching code review via Task tool after completing work. Focuses on correctness, clarity, performance, security, and adherence to established patterns.
+model: sonnet
 capabilities:
   - Security vulnerability detection (OWASP top 10)
   - Code quality assessment (DRY, YAGNI, naming, readability)

@@ -1,6 +1,7 @@
 ---
 name: tech-writer
 description: Technical writing expert for documentation. Use when /docs or /feature needs clear technical documentation, guides, tutorials, API references, or onboarding materials.
+model: haiku
 capabilities:
   - Developer-focused documentation
   - API reference writing

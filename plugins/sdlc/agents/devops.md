@@ -1,6 +1,7 @@
 ---
 name: devops
 description: DevOps engineer for deployment and infrastructure. Use when /release needs deployment automation, CI/CD pipeline setup, or infrastructure management.
+model: sonnet
 capabilities:
   - CI/CD pipeline configuration
   - Docker and container management
