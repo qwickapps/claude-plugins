@@ -1,6 +1,7 @@
 ---
 name: engineering-manager
 description: Engineering manager for release coordination and team planning. Use when /release needs cross-team coordination, priority management, or release planning.
+model: sonnet
 capabilities:
   - Release coordination
   - Priority management
