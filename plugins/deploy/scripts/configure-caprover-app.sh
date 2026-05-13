@@ -222,30 +222,13 @@ else
   fi
 fi
 
-# Enable HTTPS on the base CapRover domain (required before forceSsl can be set)
+# Base domain SSL: Wildcard certs are installed on all CapRover servers.
+# Instead of calling enablebasedomainssl (which requests individual Let's Encrypt certs
+# and risks rate limits), we set hasDefaultSubDomainSsl=true directly in the app definition.
+# The wildcard-ssl-sync cron job ensures the cert symlink exists within 5 minutes.
 if [ "$ENABLE_SSL" = "true" ]; then
   echo ""
-  echo "Enabling HTTPS on base domain..."
-  SSL_RESPONSE=$(caprover_api_call "Enable base domain SSL" \
-    curl -s -k -X POST "$CAPROVER_URL/api/v2/user/apps/appDefinitions/enablebasedomainssl" \
-    -H "Content-Type: application/json" \
-    -H "x-captain-auth: $TOKEN" \
-    -d "$(jq -n --arg app "$APP_NAME" '{appName: $app}')")
-
-  SSL_STATUS=$(echo "$SSL_RESPONSE" | jq -r '.status')
-  if [ "$SSL_STATUS" = "100" ]; then
-    echo "  HTTPS enabled on base domain"
-  else
-    SSL_DESC=$(echo "$SSL_RESPONSE" | jq -r '.description // "Unknown error"')
-    # "already enabled" is not an error
-    if echo "$SSL_DESC" | grep -iq "already"; then
-      echo "  HTTPS already enabled on base domain"
-    else
-      echo "  Warning: Could not enable HTTPS: $SSL_DESC"
-      echo "  Continuing without forceSsl..."
-      FORCE_SSL="false"
-    fi
-  fi
+  echo "Base domain SSL: using wildcard cert (no individual cert request needed)"
 fi
 
 # Fetch current app definition (read-then-write: preserves all existing fields)
@@ -271,7 +254,8 @@ MERGED=$(echo "$CURRENT_DEF" | jq \
   --argjson count "$INSTANCE_COUNT" \
   --argjson port "$CONTAINER_PORT" \
   --argjson ssl "$FORCE_SSL" \
-  '.instanceCount = $count | .containerHttpPort = $port | .forceSsl = $ssl | .websocketSupport = true | .appDeployTokenConfig = (.appDeployTokenConfig // {} | .enabled = true)')
+  --argjson basessl "$([ "$ENABLE_SSL" = "true" ] && echo true || echo false)" \
+  '.instanceCount = $count | .containerHttpPort = $port | .forceSsl = $ssl | .hasDefaultSubDomainSsl = $basessl | .websocketSupport = true | .appDeployTokenConfig = (.appDeployTokenConfig // {} | .enabled = true)')
 
 # Merge environment variables if env file provided
 if [ -n "$ENV_FILE" ] && [ -f "$ENV_FILE" ]; then
