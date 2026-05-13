@@ -13,6 +13,10 @@
     "github-actions",
     "ghcr",
     "docker",
-    "ci-cd"
+    "ci-cd",
+    "ssl",
+    "wildcard",
+    "letsencrypt",
+    "cloudflare"
   ]
 }

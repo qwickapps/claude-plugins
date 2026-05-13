@@ -127,7 +127,9 @@ Set `containerHttpPort` to match the port your application listens on. Mismatche
 
 ### SSL and Domain Configuration
 
-After creating an app, enable the custom domain and force SSL:
+**Base domain SSL (e.g., myapp.app.qwickforge.com):** All CapRover servers have wildcard certs installed. Do NOT call the `enablebasedomainssl` API — it requests individual certs and risks Let's Encrypt rate limits. Instead, set `hasDefaultSubDomainSsl: true` directly in the app definition update. The wildcard cert covers all `*.<server-domain>` subdomains automatically. See the `wildcard-ssl` skill for details.
+
+**Custom domain SSL (e.g., example.com):** Custom domains on QwickWay gateways still need individual certs:
 
 ```bash
 # Add custom domain
@@ -136,7 +138,7 @@ curl -s -k -X POST "$CAPROVER_URL/api/v2/user/apps/appDefinitions/customdomain" 
   -H "x-captain-auth: $TOKEN" \
   -d '{"appName":"<name>","customDomain":"example.com"}'
 
-# Enable SSL (Let's Encrypt)
+# Enable SSL (Let's Encrypt) - only for custom domains, not base CapRover domains
 curl -s -k -X POST "$CAPROVER_URL/api/v2/user/apps/appDefinitions/enablecustomdomainssl" \
   -H "Content-Type: application/json" \
   -H "x-captain-auth: $TOKEN" \
@@ -146,7 +148,7 @@ curl -s -k -X POST "$CAPROVER_URL/api/v2/user/apps/appDefinitions/enablecustomdo
 # Set forceSsl: true in the app definition update
 ```
 
-SSL provisioning requires DNS to be pointed at the server before calling `enablecustomdomainssl`. If DNS has not propagated, the Let's Encrypt challenge will fail.
+Custom domain SSL requires DNS to be pointed at the server before calling `enablecustomdomainssl`. If DNS has not propagated, the Let's Encrypt challenge will fail.
 
 ---
 

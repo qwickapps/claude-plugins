@@ -58,6 +58,7 @@ All scripts are self-contained bash scripts with `--flag` interfaces. They use `
 | `setup-ghcr-package.sh` | Copied from qwickapps | Configures GHCR package permissions |
 | `setup-qwickway-route.sh` | New | Provisions QwickWay gateway on route CapRover |
 | `cleanup-dev-builds.sh` | New | Keeps last N dev builds, deletes older ones |
+| `setup-wildcard-ssl.sh` | New | Sets up wildcard SSL cert on a CapRover server |
 
 ## Workflow Templates
 
@@ -89,6 +90,7 @@ For qwickapps monorepo products. Uses `self-hosted` runner with `zsh` shell.
 
 - **provisioning**: CapRover + QwickWay provisioning guidance
 - **troubleshooting**: Deployment debugging (common errors, log analysis, rollback)
+- **wildcard-ssl**: Let's Encrypt wildcard SSL setup and management for CapRover servers
 
 ## Plugin Structure
 
@@ -99,6 +101,7 @@ plugins/deploy/
   skills/
     provisioning/SKILL.md
     troubleshooting/SKILL.md
+    wildcard-ssl/SKILL.md
   scripts/
     configure-caprover-app.sh
     deploy-from-ghcr.sh
@@ -106,6 +109,7 @@ plugins/deploy/
     setup-ghcr-package.sh
     setup-qwickway-route.sh
     cleanup-dev-builds.sh
+    setup-wildcard-ssl.sh
   templates/
     deploy-standalone.yml
     deploy-monorepo-product.yml
