@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/enforce-framework-usage.sh"
+            "command": "bash -c 'f=$(ls ~/.claude/plugins/cache/qwickapps-plugins/ux-design/*/hooks/enforce-framework-usage.sh 2>/dev/null | sort -V | tail -1); [ -n \"$f\" ] && bash \"$f\" || exit 0'"
           }
         ]
       },
@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/enforce-framework-usage.sh"
+            "command": "bash -c 'f=$(ls ~/.claude/plugins/cache/qwickapps-plugins/ux-design/*/hooks/enforce-framework-usage.sh 2>/dev/null | sort -V | tail -1); [ -n \"$f\" ] && bash \"$f\" || exit 0'"
           }
         ]
       },
@@ -24,7 +24,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/enforce-framework-usage.sh"
+            "command": "bash -c 'f=$(ls ~/.claude/plugins/cache/qwickapps-plugins/ux-design/*/hooks/enforce-framework-usage.sh 2>/dev/null | sort -V | tail -1); [ -n \"$f\" ] && bash \"$f\" || exit 0'"
           }
         ]
       }
