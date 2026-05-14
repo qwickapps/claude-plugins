@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/session-start.sh\"",
+            "command": "bash -c 'f=$(ls ~/.claude/plugins/cache/qwickapps-plugins/qwickapps-sop/*/hooks/session-start.sh 2>/dev/null | sort -V | tail -1); [ -n \"$f\" ] && bash \"$f\" || exit 0'",
             "async": false
           }
         ]
