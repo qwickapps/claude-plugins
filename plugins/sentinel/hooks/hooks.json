@@ -1,0 +1,47 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'f=$(ls ~/.claude/plugins/cache/qwickapps-plugins/sentinel/*/install.sh 2>/dev/null | sort -V | tail -1); [ -n \"$f\" ] && bash \"$f\" --cron 2>/dev/null || exit 0'",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c '[ -x ~/.qwickapps/sentinel/bin/tool-recorder.sh ] && bash ~/.qwickapps/sentinel/bin/tool-recorder.sh || exit 0'"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c '[ -x ~/.qwickapps/sentinel/bin/bash-intercept.sh ] && bash ~/.qwickapps/sentinel/bin/bash-intercept.sh || exit 0'"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c '[ -x ~/.qwickapps/sentinel/bin/tool-outcome.sh ] && bash ~/.qwickapps/sentinel/bin/tool-outcome.sh || exit 0'",
+            "async": true
+          }
+        ]
+      }
+    ]
+  }
+}

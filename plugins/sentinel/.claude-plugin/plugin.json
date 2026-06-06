@@ -1,0 +1,19 @@
+{
+  "name": "sentinel",
+  "version": "1.0.0",
+  "description": "Auto-Approval Layer (AAL) for Claude Code agents. Classifies Bash tool calls by intent, enforces SOP rules via oracle, and falls back to AI safety checks for uncovered commands. Installs bash-intercept, tool-recorder, and tool-outcome hooks on first run.",
+  "author": {
+    "name": "QwickApps",
+    "email": "support@qwickapps.com"
+  },
+  "keywords": [
+    "sentinel",
+    "aal",
+    "auto-approval",
+    "bash-intercept",
+    "intent-classifier",
+    "oracle",
+    "sop-rules",
+    "safety"
+  ]
+}
