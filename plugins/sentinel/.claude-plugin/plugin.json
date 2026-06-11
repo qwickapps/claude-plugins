@@ -1,0 +1,19 @@
+{
+  "name": "sentinel",
+  "version": "1.0.0",
+  "description": "Sentinel — autonomous agent enforcement layer for Claude Code. Classifies tool calls, enforces SOP rules, records session context, and escalates blocked agents. Provides bash-intercept, tool-recorder, tool-outcome, hook-router, and oracle.",
+  "author": {
+    "name": "QwickApps",
+    "email": "support@qwickapps.com"
+  },
+  "keywords": [
+    "sentinel",
+    "sop",
+    "hooks",
+    "enforcement",
+    "autonomous-agent",
+    "tool-intercept",
+    "session-recording",
+    "oracle"
+  ]
+}

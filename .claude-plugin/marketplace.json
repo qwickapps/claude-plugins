@@ -47,6 +47,12 @@
       "description": "QwickApps Standard Operating Procedures. Optional plugin that configures SDLC skills to use QwickApps MCP tools (Confluence, Projects API, Secrets API) for knowledge base, issue context, sprint management, and worktree-driven development.",
       "source": "./plugins/qwickapps-sop",
       "category": "development"
+    },
+    {
+      "name": "sentinel",
+      "description": "Sentinel — autonomous agent enforcement layer for Claude Code. Classifies tool calls, enforces SOP rules, records session context, and escalates blocked agents. Install once; enforces across all sessions.",
+      "source": "./plugins/sentinel",
+      "category": "devops"
     }
   ]
 }
