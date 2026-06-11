@@ -1,8 +1,11 @@
 # QwickApps Claude Code Plugins
 
-Official plugin marketplace for QwickApps development with Claude Code. Six plugins covering the full development lifecycle: SDLC discipline, tech stack guidance, UX design enforcement, cloud infrastructure, deployment automation, and secrets management.
+Official plugin marketplace for QwickApps development with Claude Code. Seven plugins covering the full development lifecycle: SDLC discipline, tech stack guidance, UX design enforcement, cloud infrastructure, deployment automation, secrets management, and autonomous agent enforcement.
 
 ## What's New
+
+**June 2026**
+- **sentinel** plugin: autonomous agent enforcement layer — classifies tool calls, enforces SOP rules, records sessions, escalates blocked agents
 
 **March 2026**
 - **secrets** plugin: `github-infra` subcommand for infrastructure-level secrets, env-level naming fixes
@@ -27,6 +30,7 @@ Official plugin marketplace for QwickApps development with Claude Code. Six plug
 /plugins install cloud          # Oracle Cloud infrastructure provisioning
 /plugins install deploy         # CapRover deployment automation
 /plugins install secrets        # Encrypted environment variables
+/plugins install sentinel       # Autonomous agent enforcement
 ```
 
 ## Plugins
@@ -150,12 +154,35 @@ Encrypted environment variable management with SOPS+age. Single `environments.ym
 
 **Hooks**: session-start (detects environments.yml and loads context), pre-commit-guard (blocks unencrypted secret files)
 
+---
+
+### sentinel
+
+Autonomous agent enforcement layer for Claude Code. Every tool call is classified, checked against SOP rules, and either approved, blocked, or redirected before Claude acts.
+
+**Hooks** (6):
+
+| Event | Hook | Purpose |
+|-------|------|---------|
+| `PreToolUse (Bash)` | `bash-intercept.sh` | Classify + oracle + AI safety check |
+| `PreToolUse (.*)` | `tool-recorder.sh` | Session recording |
+| `PostToolUse (.*)` | `tool-outcome.sh` | Async outcome logging |
+| `Stop` | `hook-router.sh Stop` | Escalate-dont-stall |
+| `PreCompact` | `hook-router.sh PreCompact` | Session snapshot + brain flush |
+| `SessionEnd` | `hook-router.sh SessionEnd` | Session snapshot + brain flush |
+
+**Config** (after `install.sh`): `~/.qwickapps/sentinel/sop-rules.yaml` — rule set evaluated by oracle on every intercepted command. Project-local overrides: `.sentinel/sop-rules.yaml`.
+
+**Standalone install**: `bash ~/.sentinel-src/install.sh` — wires hooks into `.claude/settings.json` without requiring the plugin system.
+
+---
+
 ## Repository Structure
 
 ```
 claude-plugins/
   .claude-plugin/
-    marketplace.json          # Marketplace registry (6 plugins)
+    marketplace.json          # Marketplace registry (7 plugins)
   plugins/
     sdlc/                     # SDLC workflows and discipline
       commands/               # 9 slash commands
@@ -187,6 +214,8 @@ claude-plugins/
       hooks/                  # Session start + pre-commit guard
       scripts/                # Sync and encryption utilities
       templates/              # Example config files
+    sentinel/                 # Autonomous agent enforcement
+      hooks/                  # bash-intercept, tool-recorder, tool-outcome, hook-router, session-start
 ```
 
 ## How the Plugins Work Together
@@ -197,5 +226,6 @@ claude-plugins/
 4. **Provision infrastructure** with `cloud` for Oracle Cloud free-tier VMs and services
 5. **Deploy** with `deploy` to generate GitHub Actions workflows and manage CapRover apps
 6. **Manage secrets** with `secrets` to keep environment variables encrypted and in sync
+7. **Enforce discipline** with `sentinel` to block SOP violations at the tool-call level before they reach Claude
 
-The SDLC plugin provides the process. The dev guide provides the architecture. The UX design plugin provides the guardrails. The cloud, deploy, and secrets plugins handle infrastructure and operations.
+The SDLC plugin provides the process. The dev guide provides the architecture. The UX design plugin provides the guardrails. The cloud, deploy, and secrets plugins handle infrastructure and operations. Sentinel enforces safety across all sessions by intercepting tool calls before they execute.

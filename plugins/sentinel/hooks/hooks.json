@@ -5,28 +5,28 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c 'f=$(ls ~/.claude/plugins/cache/qwickapps-plugins/sentinel/*/install.sh 2>/dev/null | sort -V | tail -1); [ -n \"$f\" ] && bash \"$f\" --cron 2>/dev/null || exit 0'",
-            "async": true
+            "command": "bash -c 'f=$(ls ~/.claude/plugins/cache/qwickapps-plugins/sentinel/*/hooks/session-start.sh 2>/dev/null | sort -V | tail -1); [ -n \"$f\" ] && bash \"$f\" || exit 0'",
+            "async": false
           }
         ]
       }
     ],
     "PreToolUse": [
       {
-        "matcher": ".*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash -c '[ -x ~/.qwickapps/sentinel/bin/tool-recorder.sh ] && bash ~/.qwickapps/sentinel/bin/tool-recorder.sh || exit 0'"
-          }
-        ]
-      },
-      {
         "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c '[ -x ~/.qwickapps/sentinel/bin/bash-intercept.sh ] && bash ~/.qwickapps/sentinel/bin/bash-intercept.sh || exit 0'"
+            "command": "bash -c 'f=$(ls ~/.claude/plugins/cache/qwickapps-plugins/sentinel/*/hooks/bash-intercept.sh 2>/dev/null | sort -V | tail -1); [ -n \"$f\" ] && bash \"$f\" || exit 0'"
+          }
+        ]
+      },
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'f=$(ls ~/.claude/plugins/cache/qwickapps-plugins/sentinel/*/hooks/tool-recorder.sh 2>/dev/null | sort -V | tail -1); [ -n \"$f\" ] && bash \"$f\" || exit 0'"
           }
         ]
       }
@@ -37,7 +37,43 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c '[ -x ~/.qwickapps/sentinel/bin/tool-outcome.sh ] && bash ~/.qwickapps/sentinel/bin/tool-outcome.sh || exit 0'",
+            "command": "bash -c 'f=$(ls ~/.claude/plugins/cache/qwickapps-plugins/sentinel/*/hooks/tool-outcome.sh 2>/dev/null | sort -V | tail -1); [ -n \"$f\" ] && bash \"$f\" || exit 0'",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'f=$(ls ~/.claude/plugins/cache/qwickapps-plugins/sentinel/*/hooks/hook-router.sh 2>/dev/null | sort -V | tail -1); [ -n \"$f\" ] && bash \"$f\" Stop || exit 0'",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'f=$(ls ~/.claude/plugins/cache/qwickapps-plugins/sentinel/*/hooks/hook-router.sh 2>/dev/null | sort -V | tail -1); [ -n \"$f\" ] && bash \"$f\" PreCompact || exit 0'",
+            "async": true
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'f=$(ls ~/.claude/plugins/cache/qwickapps-plugins/sentinel/*/hooks/hook-router.sh 2>/dev/null | sort -V | tail -1); [ -n \"$f\" ] && bash \"$f\" SessionEnd || exit 0'",
             "async": true
           }
         ]
