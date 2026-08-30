@@ -172,11 +172,15 @@ The `deploy-from-ghcr.sh` script in `${CLAUDE_PLUGIN_ROOT}/scripts/` implements 
 curl -s -k "$CAPROVER_URL/api/v2/user/registries" \
   -H "x-captain-auth: $TOKEN" | jq '.data.registries'
 
-# Delete stale entry (repeat for each stale ID)
+# Delete stale entry (repeat for each stale ID). NOTE: the field name is
+# "registryId", not "id" -- using "id" returns {"status":1111,"description":
+# "Registry not found"} even when the entry clearly exists in the list above.
+# If the stale entry is also the defaultPushRegistryId, repoint that first via
+# /registries/setpush or the delete will fail with "Cannot remove the default push."
 curl -s -k -X POST "$CAPROVER_URL/api/v2/user/registries/delete" \
   -H "Content-Type: application/json" \
   -H "x-captain-auth: $TOKEN" \
-  -d '{"id":"<registry-id>"}'
+  -d '{"registryId":"<registry-id>"}'
 
 # Insert fresh credentials
 curl -s -k -X POST "$CAPROVER_URL/api/v2/user/registries/insert" \

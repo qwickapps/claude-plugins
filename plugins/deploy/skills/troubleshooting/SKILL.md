@@ -206,11 +206,13 @@ If multiple ghcr.io entries appear, they are stale duplicates.
 **Fix:** Delete all existing ghcr.io entries and insert fresh credentials. The `deploy-from-ghcr.sh` script in `${CLAUDE_PLUGIN_ROOT}/scripts/` does this automatically. To fix manually:
 
 ```bash
-# Delete stale entries (repeat for each ID)
+# Delete stale entries (repeat for each ID). Field name is "registryId", not
+# "id" -- "id" silently returns {"status":1111,"description":"Registry not
+# found"} even for an entry that clearly exists.
 curl -s -k -X POST "$CAPROVER_URL/api/v2/user/registries/delete" \
   -H "Content-Type: application/json" \
   -H "x-captain-auth: $TOKEN" \
-  -d '{"id":"<registry-id>"}'
+  -d '{"registryId":"<registry-id>"}'
 
 # Insert fresh credentials
 curl -s -k -X POST "$CAPROVER_URL/api/v2/user/registries/insert" \
